@@ -1,0 +1,22 @@
+Changes on May 18, 2008:
+    * Repackaged as pyGalaxy
+    * Started cross-platform WiiMote support
+
+Changes on July 23, 2007:
+    * Redid socket interface for WiiMoteConnect
+    * Added nunchuk roll, pitch, tilt
+    * Added nunchuk joystick functions
+    * Added line intersection test with sprite bbox
+
+Changes on July 18, 2007:
+    * Updated package system
+
+Changes on July 16, 2007:
+    * Added load_animated_gif() function
+    * Added set_anim_seq() and set_anim_frame() to supplement start_anim_seq() 
+
+Changes on July 11, 2007:
+    * Added ang argument for blit, rotates about middle of image
+    * Added rotate_image flag for sprites, if True will rotate sprite by direction 
+
+Initial version for COSMOS class installed July 8, 2007.
