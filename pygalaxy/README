@@ -2,9 +2,16 @@ pyGalaxy
 by Nathan Whitehead
 May 19, 2008
 
-
 This is a PyGame game library designed to make programming simple 2D 
 games easier.  It works with keyboard, joystick, mouse, and Wii 
 controllers connected on bluetooth.  It has drawing primitives, animated 
 sprites, collision detection, music, sound effects, particle systems, 
 artificial intelligence and more!
+
+This library is packaged using distutils.  To install from source,
+you probably want to do:
+
+sudo python setup.py install
+
+Documentation is available in the doc/ directory.
+
