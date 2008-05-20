@@ -1,11 +1,11 @@
 """Graphics operations on the screen.
 
 This is for drawing one frame.  For moving objects and animation,
-use sprites.
+you probably want to use sprites.
 """
 
 import pygame
-import engine_util
+import pygalaxy_util
 import math
 import Image, ImageSequence
 import tempfile
