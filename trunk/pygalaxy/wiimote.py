@@ -1,8 +1,9 @@
 import os
 import struct
 
-W_MAXBUTTON = 12
+import socketipc
 
+W_MAXBUTTON = 12
 
 class WiimoteError(IOError):
     """Raised if there is any problem related to the Wii Remote."""
@@ -22,14 +23,8 @@ class Wiimote:
         
     def _connect(self):
         """Connect Wiimote object to physical wiimote."""
-        self.pipe_cmd = os.open(_cmdfn, os.O_WRONLY)
-        self.pipe_data = None
+        self.connection = socketipc.IPCClient(port=15008)
 
-#    def __del__(self):
-#        os.close(self.pipe_cmd)
-#        if self.pipe_data:
-#            os.close(self.pipe_data)
-        
     def get_button(self, button):
         """Get the state of a Wiimote button."""
         if button >= 0 and button <= W_MAXBUTTON:
@@ -61,10 +56,8 @@ class Wiimote:
         and get_acc().  Generally should be called once a frame.
         """
         fmt = "B" * (W_MAXBUTTON + 1) + "ffffffff"
-        os.write(self.pipe_cmd, chr(self.num))
-        if self.pipe_data == None:
-            self.pipe_data = os.open(_datafn, os.O_RDONLY)
-        sdata = os.read(self.pipe_data, struct.calcsize(fmt))
+        self.connection.send(chr(self.num))
+        sdata = self.connection.receive()
         data = struct.unpack(fmt, sdata)
         self.button = data[0 : W_MAXBUTTON + 1]
         self.acc = data[W_MAXBUTTON + 1 : W_MAXBUTTON + 1 + 3]
