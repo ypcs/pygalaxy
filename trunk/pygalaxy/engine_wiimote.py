@@ -3,8 +3,6 @@ import struct
 
 W_MAXBUTTON = 12
 
-_cmdfn = os.path.expanduser('~/WIIMOTEcmd')
-_datafn = os.path.expanduser('~/WIIMOTEdata')
 
 class WiimoteError(IOError):
     """Raised if there is any problem related to the Wii Remote."""
