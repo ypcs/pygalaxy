@@ -2,7 +2,6 @@
 
 = README =
 
-{{{
 SWMixer 0.1
 Advanced Realtime Software Mixer
 
@@ -224,4 +223,3 @@ Currently there is no way to limit the number of sounds mixed at once
 to prevent excessive CPU usage.
 
 No way to pan mono sounds to different positions in stereo output.
-}}}
