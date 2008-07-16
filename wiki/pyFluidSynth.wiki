@@ -29,7 +29,7 @@ FluidSynth 1.0.7 + development headers (or later version)
 pyFluidSynth is packaged as C source using distutils.  To install,
 run the following command as root:
 
-  python setup.py install
+  {{{python setup.py install}}}
 
 For more information and options about using distutils, read:
 http://docs.python.org/inst/inst.html
