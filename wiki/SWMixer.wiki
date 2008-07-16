@@ -2,8 +2,8 @@
 
 = README =
 
-SWMixer 0.1
-Advanced Realtime Software Mixer
+== SWMixer 0.1 ==
+== Advanced Realtime Software Mixer ==
 
 Copyright 2008, Nathan Whitehead 
 Released under the LGPL
@@ -20,7 +20,7 @@ audio input during playback (if supported in pyaudio with your sound
 card).
 
 
-REQUIREMENTS
+== REQUIREMENTS ==
 
 PyAudio 0.2.0 (or more recent)
 http://people.csail.mit.edu/hubert/pyaudio/
@@ -29,7 +29,7 @@ NumPy 1.0 (or more recent)
 http://numpy.scipy.org/
 
 
-INSTALLATION
+== INSTALLATION ==
 
 SWMixer is packaged as Python source using distutils.  To install,
 run the following command as root:
@@ -40,7 +40,7 @@ For more information and options about using distutils, read:
 http://docs.python.org/inst/inst.html
 
 
-HOW CAN IT POSSIBLY WORK IN PYTHON?
+== HOW CAN IT POSSIBLY WORK IN PYTHON? ==
 
 Realtime mixing of sample data is done entirely in python using the
 high performance of array operations in NumPy.  Converting between
@@ -50,7 +50,7 @@ function of NumPy.  Simultaneous playback and recording is possibly
 using PyAudio.
 
 
-EXAMPLES
+== EXAMPLES ==
 
 See the pydoc documentation for details on all the functions and
 for all the options and default values.
@@ -88,7 +88,7 @@ time.sleep(1.0)
 }}}
 
 
-EXPLICIT TICK INTERFACE
+== EXPLICIT TICK INTERFACE ==
 
 Instead of calling swmixer.start() you may also call swmixer.tick() every
 frame in your main loop.  This gives you greater control over synchronizing
@@ -135,7 +135,7 @@ while True:
 }}}
 
 
-RECORDING
+== RECORDING == 
 
 To enable sound recording using the microphone, either pass
 microphone=True to swmixer.init() or call swmixer.microphone_on()
@@ -178,7 +178,7 @@ while True:
 }}}
 
 
-SWMIXER WITH PYGAME
+== SWMIXER WITH PYGAME ==
 
 You can use swmixer as an almost drop-in replacement for pygame.mixer.
 You may want to do this for the following reasons:
@@ -207,7 +207,7 @@ is returned.  This Channel object is used to control playback of that
 particular instance of the Sound.
 
 
-BUGS AND LIMITATIONS
+== BUGS AND LIMITATIONS ==
 
 Always outputs in 16-bit mode.
 
