@@ -1,7 +1,8 @@
 #summary One-sentence summary of this page.
 
-= pyFluidSynth =
+= README =
 
+== pyFluidSynth ==
 == Python bindings for FluidSynth ==
 
 Copyright 2008, Nathan Whitehead <nwhitehe@gmail.com>
