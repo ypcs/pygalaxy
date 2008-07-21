@@ -1,0 +1,3 @@
+import pygalaxy
+
+pygalaxy.init()
