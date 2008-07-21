@@ -28,7 +28,10 @@ The server must start first, then do an accept() to wait for the client.
 The client cannot wait for the server to start.
 
 The server can handle multiple connections at once, just do an accept()
-whenever you want to allow a new connection from a client.
+whenever you want to allow a new connection from a client.  You must
+have a protocol to determine when a client connects and who talks when.
+accept() blocks until a connection is made.  There are no provisions
+for using select() to wait until someone says something.
 
 When interfacing with other languages:
 Messages are delimited by length.  First 4 bytes are the length of the

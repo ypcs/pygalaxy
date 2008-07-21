@@ -3,23 +3,31 @@ import pygame
 
 # Directly import pygame constants, such as key names (e.g. K_LEFT)
 # (less typing)
-from pygame.locals import *
+#from pygame.locals import *
 
-from engine_util import *
-from engine_graphics import *
-from engine_sound import *
-from engine_behaviors import *
-from engine_sprites import *
-from engine_events import *
-from engine_network import *
-from math import *
+import pygalaxy_util
+import graphics
+#import sprite
+#import event
 
-def start():
-    """Start engine and open graphics screen for drawing."""
+def init(width=pygalaxy_util.WIDTH, height=pygalaxy_util.HEIGHT, fullscreen=pygalaxy_util.DEFAULT_FULLSCREEN):
+    """
+    Start engine and set up a window for graphics drawing.
+
+    This function must be called before any graphics can be drawn.
+    Pygame only allows one window open at a time.  If this function
+    is called more than once, it will resize the existing window.
+
+    Keyword arguments:
+    width -- width of window in pixels
+    height -- height of window in pixels
+    fullscreen -- if True will turn on fullscreen mode
+
+    """
     # Start pygame, needed before we do anything else with pygame
     pygame.init()
-    start_graphics()
-    connect_to_joysticks()
+    graphics.setup_graphics(width=width, height=height, fullscreen=fullscreen)
+    #connect_to_joysticks()
 
 # Start clock (used for fps calculations, timed events)
 clock = pygame.time.Clock()
@@ -95,11 +103,11 @@ def tick():
     """
     global _debug_fps
     clock.tick(fps)
-    handle_events()
-    update_sprites()
+    #event.handle_events()
+    #sprite.update_sprites()
     if background_color:
-        draw_background(background_color)
-    draw_sprites()
+        graphics.draw_background(background_color)
+    #sprite.draw_sprites()
     #flip()
     _debug_fps += 1
     if _debug_fps > 50: #every 50 frames

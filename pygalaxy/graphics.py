@@ -12,7 +12,7 @@ import tempfile
 
 screen = None
 
-def setup(width=pygalaxy_util.WIDTH, height=pygalaxy_util.HEIGHT, fullscreen=pygalaxy_util.DEFAULT_FULLSCREEN):
+def setup_graphics(width=pygalaxy_util.WIDTH, height=pygalaxy_util.HEIGHT, fullscreen=pygalaxy_util.DEFAULT_FULLSCREEN):
     """
     Set up and open a window for graphics drawing.
 
