@@ -1,0 +1,24 @@
+Wiimote client-server protocol
+
+Server is utility program (daemon) that connects to wiimote,
+accepts information requests from client programs.  Pygalaxy
+is the client, gets info and passes it along to games.
+
+Client initiates all communication, sends command and gets response
+Command is a pair of a text string command and data
+format of data (2nd part of pair) depends on command (may be None)
+Server response depends on command, may be None
+
+Command Data Response
+"INFO" None list, gets info for devices connected
+"GET" int list, gets state of one device
+"RUMBLE" int*bool None, set rumble on/off for particular device
+
+GET status format:
+  tuple of
+    button state (list of bool, includes nunchuk buttons)
+    accelerometer values (list of float) (normalized with 1 = 1G, xyz)
+    nunchuk acc values (list of float) (normalized, xyz)
+    joystick values (list of float) (normalized to -1..1, xy)
+
+If no nunchuk, will always have 0.0 for acc and unpressed for buttons.
