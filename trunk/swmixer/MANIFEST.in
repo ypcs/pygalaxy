@@ -1,0 +1,2 @@
+include test/*.wav
+include doc/*
