@@ -135,6 +135,10 @@ while True:
           if evt.type == pygame.QUIT: sys.exit()
 --
 
+You can also call swmixer.set_buffersize(size) at any time to change
+the buffer size and thus change the framerate.  Switching the buffer
+size to 512 will double the framerate.
+
 
 RECORDING
 

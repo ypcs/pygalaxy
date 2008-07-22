@@ -481,3 +481,14 @@ def quit():
     if gmicstream is not None:
         gmicstream.close()
     gpyaudio.terminate()
+
+def set_chunksize(size=1024):
+    """Set the audio chunk size for each frame of audio output
+
+    This function is useful for setting the framerate when audio output
+    is synchronized with video.
+    """
+    global gchunksize
+    glock.acquire()
+    gchunksize = size
+    glock.release()
