@@ -1,0 +1,163 @@
+
+pyFluidSynth
+
+Python bindings for FluidSynth
+
+Copyright 2008, Nathan Whitehead <nwhitehe@gmail.com>
+Released under the LGPL
+
+
+This module contains python bindings for FluidSynth.  FluidSynth is a
+software synthesizer for generating music.  It works like a MIDI
+synthesizer.  You load patches, set parameters, then send NOTEON and
+NOTEOFF events to play notes.  Instruments are defined in SoundFonts,
+generally files with the extension SF2.  FluidSynth can either be used
+to generate audio itself, or you can call a function that returns
+chunks of audio data and output the data to the soundcard yourself.
+FluidSynth works on all major platforms, so pyFluidSynth should also.
+
+
+REQUIREMENTS
+
+FluidSynth 1.0.7 + development headers (or later version)
+(earlier versions probably work, untested)
+http://www.nongnu.org/fluid/
+
+
+DOWNLOAD
+
+pyFluidSynth is available as a source distribution from PyPI.
+http://pypi.python.org/pypi/pyFluidSynth
+
+
+INSTALLATION
+
+pyFluidSynth is packaged as C source using distutils.  To install,
+run the following command as root:
+
+python setup.py install
+
+For more information and options about using distutils, read:
+http://docs.python.org/inst/inst.html
+
+For help with compiler flags in case C compiling is not working:
+http://docs.python.org/inst/tweak-flags.html
+
+
+EXAMPLE
+
+Here is a program that plays a chord for a second.
+
+--
+import pyfluidsynth as fl
+import time
+
+fl.init()
+fl.start()
+
+sf = fl.sfload("example.sf2")
+fl.program_select(0, sf, 0, 0)
+
+fl.noteon(0, 60, 30)
+fl.noteon(0, 67, 30)
+fl.noteon(0, 76, 30)
+
+time.sleep(1.0)
+
+fl.noteoff(0, 60)
+fl.noteoff(0, 67)
+fl.noteoff(0, 76)
+
+time.sleep(1.0)
+
+fl.stop()
+--
+
+The init() command initializes the FluidSynth synthesizer data.
+The start() command starts audio output in a separate thread.
+
+To get sound, you need to choose an instrument.  First load a
+SoundFont with sfload(), then select a bank and preset with
+program_select().
+
+  program_select(track, soundfont, banknum, presetnum)
+
+To start a note, use noteon().
+
+  noteon(track, midinum, velocity)
+
+To stop a note, use noteoff().
+
+  noteoff(track, midinum)
+
+
+MANAGING AUDIO
+
+You can also manage audio IO yourself and just use FluidSynth to
+calculate the samples for the music.  You might do this, for example,
+in a game with WAV sound effects and algorithmically generated music.
+To do this, call init() but don't call start().  To generate the next
+chunk of audio, call write_s16().
+
+  write_s16(len)
+
+The length you pass will be the number of frames of audio.  Each frame
+is 2 bytes per channel * 2 channels.  Unless specified otherwise,
+FluidSynth assumes an output rate of 44100 Hz.
+
+Here is an example that generates a chord then plays the data using
+PyAudio.
+
+--
+import pyfluidsynth as fl
+import time
+import pyaudio
+
+pa = pyaudio.PyAudio()
+strm = pa.open(
+    format = pyaudio.paInt16,
+    channels = 2, 
+    rate = 44100, 
+    output = True)
+
+s = []
+
+fl.init()
+
+# Initial silence is 1 second
+s.append(fl.write_s16(44100 * 1))
+
+sf = fl.sfload("example.sf2")
+fl.program_select(0, sf, 0, 0)
+
+fl.noteon(0, 60, 30)
+fl.noteon(0, 67, 30)
+fl.noteon(0, 76, 30)
+
+# Chord is held for 2 seconds
+s.append(fl.write_s16(44100 * 2))
+
+fl.noteoff(0, 60)
+fl.noteoff(0, 67)
+fl.noteoff(0, 76)
+
+# Decay of chord is held for 1 second
+s.append(fl.write_s16(44100 * 1))
+
+fl.stop()
+
+samps = ''.join(s)
+
+print len(samps)
+strm.write(samps)
+--
+
+
+BUGS AND LIMITATIONS
+
+Not all functions in FluidSynth are bound.
+
+Interface does not support multiple FluidSynth synthesizers at once.
+
+Not much error checking, FluidSynth will segfault/crash if you call
+the functions incorrectly sometimes.
