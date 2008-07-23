@@ -159,6 +159,7 @@ def fluid_synth_write_s16_stereo(synth, len):
 # Object-oriented interface, simplifies access to functions
 
 class Synth:
+    """Synth represents a FluidSynth synthesizer"""
     def __init__(self, gain=0.2, samplerate=44100):
         """Create new synthesizer object to control sound generation
 
