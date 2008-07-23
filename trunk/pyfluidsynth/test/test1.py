@@ -1,22 +1,22 @@
-import pyfluidsynth as fl
 import time
+import fluidsynth
 
-fl.init()
-fl.start()
+fs = fluidsynth.Synth()
+fs.start()
 
-sf = fl.sfload("example.sf2")
-fl.program_select(0, sf, 0, 0)
+sfid = fs.sfload("example.sf2")
+fs.program_select(0, sfid, 0, 0)
 
-fl.noteon(0, 60, 30)
-fl.noteon(0, 67, 30)
-fl.noteon(0, 76, 30)
-
-time.sleep(1.0)
-
-fl.noteoff(0, 60)
-fl.noteoff(0, 67)
-fl.noteoff(0, 76)
+fs.noteon(0, 60, 30)
+fs.noteon(0, 67, 30)
+fs.noteon(0, 76, 30)
 
 time.sleep(1.0)
 
-fl.stop()
+fs.noteoff(0, 60)
+fs.noteoff(0, 67)
+fs.noteoff(0, 76)
+
+time.sleep(1.0)
+
+fs.delete()
