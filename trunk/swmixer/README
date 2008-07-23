@@ -1,5 +1,5 @@
-SWMixer
-Advanced Realtime Software Mixer
+=SWMixer=
+==Advanced Realtime Software Mixer==
 
 Copyright 2008, Nathan Whitehead 
 Released under the LGPL
@@ -16,7 +16,7 @@ audio input during playback (if supported in pyaudio with your sound
 card).
 
 
-REQUIREMENTS
+==REQUIREMENTS==
 
 PyAudio 0.2.0 (or more recent)
 http://people.csail.mit.edu/hubert/pyaudio/
@@ -25,13 +25,13 @@ NumPy 1.0 (or more recent)
 http://numpy.scipy.org/
 
 
-DOWNLOAD
+==DOWNLOAD==
 
 A source distribution is available at PyPI:
 http://pypi.python.org/pypi/SWMixer
 
 
-INSTALLATION
+==INSTALLATION==
 
 SWMixer is packaged as Python source using distutils.  To install,
 run the following command as root:
@@ -42,7 +42,7 @@ For more information and options about using distutils, read:
 http://docs.python.org/inst/inst.html
 
 
-HOW CAN IT POSSIBLY WORK IN PYTHON?
+==HOW CAN IT POSSIBLY WORK IN PYTHON?==
 
 Realtime mixing of sample data is done entirely in python using the
 high performance of array operations in NumPy.  Converting between
@@ -52,13 +52,14 @@ function of NumPy.  Simultaneous playback and recording is possibly
 using PyAudio.
 
 
-EXAMPLES
+==EXAMPLES==
 
 See the pydoc documentation for details on all the functions and
 for all the options and default values.
 
 A very short example of using swmixer to play a sound.
---
+
+{{{
 import swmixer
 import time
 
@@ -67,12 +68,12 @@ swmixer.start()
 snd = swmixer.Sound("test1.wav")
 snd.play()
 time.sleep(2.0) #don't quit before we hear the sound!
---
+}}}
 
 Here is an example showing some more options and how to control the
 sound after it starts playing.  
 
---
+{{{
 import swmixer 
 import time
 
@@ -86,10 +87,10 @@ chan.set_position(chan.get_position() - 20000)
 time.sleep(1.0)
 chan.stop()
 time.sleep(1.0)
---
+}}}
 
 
-EXPLICIT TICK INTERFACE
+==EXPLICIT TICK INTERFACE==
 
 Instead of calling swmixer.start() you may also call swmixer.tick() every
 frame in your main loop.  This gives you greater control over synchronizing
@@ -113,7 +114,7 @@ multiple of your audio framerate.
 Here is a silly example showing a moving green square with a
 background sound.  The square should move at 43 pixels / second.
 
---
+{{{
 import sys
 import swmixer
 import pygame
@@ -133,14 +134,14 @@ while True:
       pygame.display.flip()
       for evt in pygame.event.get():
           if evt.type == pygame.QUIT: sys.exit()
---
+}}}
 
 You can also call swmixer.set_buffersize(size) at any time to change
 the buffer size and thus change the framerate.  Switching the buffer
 size to 512 will double the framerate.
 
 
-RECORDING
+==RECORDING==
 
 To enable sound recording using the microphone, either pass
 microphone=True to swmixer.init() or call swmixer.microphone_on()
@@ -159,7 +160,7 @@ snd=swmixer.Sound(data=s)
 Here is an annoying example program that records and plays back
 data from the microphone while playing a test sound in the background.
 
---
+{{{
 import sys
 import swmixer
 import numpy
@@ -181,18 +182,18 @@ while True:
         micsnd.play()
         micdata = []
         frame = 0
---
+}}}
 
 
-SWMIXER WITH PYGAME
+==SWMIXER WITH PYGAME==
 
 You can use swmixer as an almost drop-in replacement for pygame.mixer.
 You may want to do this for the following reasons:
 
-* alternate audio driver, avoid bugs in SDL
-* more control over precise sample positioning
-* automatic resampling of loaded WAV files to correct playback speed
-* support for simultaneous audio input
+  * alternate audio driver, avoid bugs in SDL
+  * more control over precise sample positioning
+  * automatic resampling of loaded WAV files to correct playback speed
+  * support for simultaneous audio input
 
 To use swmixer with pygame, it is best to initialize swmixer before
 initializing pygame.  You cannot start both the pygame mixer and
@@ -213,7 +214,7 @@ is returned.  This Channel object is used to control playback of that
 particular instance of the Sound.
 
 
-BUGS AND LIMITATIONS
+==BUGS AND LIMITATIONS==
 
 Always outputs in 16-bit mode.
 
