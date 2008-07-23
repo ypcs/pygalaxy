@@ -1,6 +1,7 @@
-import pyfluidsynth as fl
 import time
+import numpy
 import pyaudio
+import fluidsynth
 
 pa = pyaudio.PyAudio()
 strm = pa.open(
@@ -11,31 +12,32 @@ strm = pa.open(
 
 s = []
 
-fl.init()
+fl = fluidsynth.Synth()
 
 # Initial silence is 1 second
-s.append(fl.write_s16(44100 * 1))
+s = numpy.append(s, fl.get_samples(44100 * 1))
 
-sf = fl.sfload("example.sf2")
-fl.program_select(0, sf, 0, 0)
+sfid = fl.sfload("example.sf2")
+fl.program_select(0, sfid, 0, 0)
 
 fl.noteon(0, 60, 30)
 fl.noteon(0, 67, 30)
 fl.noteon(0, 76, 30)
 
 # Chord is held for 2 seconds
-s.append(fl.write_s16(44100 * 2))
+s = numpy.append(s, fl.get_samples(44100 * 2))
 
 fl.noteoff(0, 60)
 fl.noteoff(0, 67)
 fl.noteoff(0, 76)
 
 # Decay of chord is held for 1 second
-s.append(fl.write_s16(44100 * 1))
+s = numpy.append(s, fl.get_samples(44100 * 1))
 
-fl.stop()
+fl.delete()
 
-samps = ''.join(s)
+samps = fluidsynth.raw_audio_string(s)
 
 print len(samps)
+print 'Starting playback'
 strm.write(samps)

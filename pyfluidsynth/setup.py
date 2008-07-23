@@ -1,12 +1,7 @@
 from distutils.core import setup, Extension
 
-module1 = Extension('pyfluidsynth',
-                    libraries = ['fluidsynth'],
-                    sources = ['pyfluidsynthmodule.c'],
-                    )
-
-setup (name = 'pyFluidSynth',
-       version = '1.1',
+setup (name = 'FluidSynth',
+       version = '1.2',
        author = 'Nathan Whitehead',
        author_email = 'nwhitehe@gmail.com',
        url = 'http://code.google.com/p/pygalaxy/',
@@ -19,4 +14,4 @@ Instruments are defined in SoundFonts, generally files with the extension SF2.
 FluidSynth can either be used to generate audio itself, or you can call a
 function that returns chunks of audio data and output the data to the soundcard
 yourself.''',
-       ext_modules = [module1])
+       py_modules = ['fluidsynth'])
