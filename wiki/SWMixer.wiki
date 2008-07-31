@@ -54,7 +54,7 @@ using PyAudio.
 
 ==EXAMPLES==
 
-See the pydoc documentation for details on all the functions and
+See the [http://paranoidbrain.com/swmixer.html pydoc documentation] for details on all the functions and
 for all the options and default values.
 
 A very short example of using swmixer to play a sound.
