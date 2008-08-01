@@ -21,10 +21,15 @@ import thread
 import numpy
 import pyaudio
 
+try:
+    import mad
+except:
+    "MP3 streaming disabled"
+
 ginit = False
 gstereo = True
 gchunksize = 1024
-gsamplerate = 22050
+gsamplerate = 44100
 gchannels = 1
 gsamplewidth = 2
 gpyaudio = None
@@ -38,27 +43,90 @@ glock = thread.allocate_lock()
 ginput_device_index = None
 goutput_device_index = None
 
-# Format for srcs:
-#   first element is raw data
-#   second is current play position in samples
-#   third is volume envelope, list of time,vol pairs (time in samples)
+class _SoundSourceData:
+    def __init__(self, data, loops):
+        self.data = data
+        self.pos = 0
+        self.loops = loops
+        self.done = False
+    def set_position(self, pos):
+        self.pos = pos % len(self.data)
+    def get_samples(self, sz):
+        z = self.data[self.pos:self.pos + sz]
+        self.pos += sz
+        if len(z) < sz:
+            # oops, sample data didn't cover buffer
+            if self.loops != 0:
+                # loop around
+                self.loops -= 1
+                self.pos = sz - len(z)
+                z = numpy.append(z, self.data[:sz - len(z)])
+            else:
+                # nothing to loop, just append zeroes
+                z = numpy.append(z, numpy.zeros(sz - len(z), numpy.int16))
+                # and stop the sample, it's done
+                self.done = True
+        if self.pos == len(self.data):
+            # this case loops without needing any appending
+            if self.loops != 0:
+                self.loops -= 1
+                self.pos = 0
+            else:
+                self.done = True
+        return z
+
+class _SoundSourceStream:
+    def __init__(self, fileobj, loops):
+        self.fileobj = fileobj
+        self.pos = 0
+        self.loops = loops
+        self.done = False
+        self.buf = ''
+    def set_position(self, pos):
+        self.pos = pos
+        self.fileobj.seek_time(pos * 1000 / gsamplerate / 2)
+    def get_samples(self, sz):
+        szb = sz * 2
+        while len(self.buf) < szb:
+            s = self.fileobj.read()
+            if s is None or s == '': break
+            self.buf += s[:]
+        z = numpy.fromstring(self.buf[:szb], dtype=numpy.int16)
+        if len(z) < sz:
+            # In this case we ran out of stream data
+            # append zeros (don't try to be sample accurate for streams)
+            z = numpy.append(z, numpy.zeros(sz - len(z), numpy.int16))
+            if self.loops != 0:
+                self.loops -= 1
+                self.pos = 0
+                self.fileobj.seek_time(0)
+                self.buf = ''
+            else:
+                self.done = True
+        else:
+            # remove head of buffer
+            self.buf = self.buf[szb:]
+        return z
 
 # A channel is a "sound event" that is playing
 class Channel:
     """Represents one sound source currently playing"""
-    def __init__(self, data, pos, env, loops):
+    def __init__(self, src, env):
         global gid
         self.id = gid
         gid += 1
-        self.data = data
-        self.pos = pos
+        self.src = src
         self.env = env
-        self.loops = loops
         self.active = True
+        self.done = False
     def stop(self):
         """Stop the sound playing"""
         glock.acquire()
-        gmixer_srcs.remove(self)
+        # If the sound has already ended, don't raise exception
+        try:
+            gmixer_srcs.remove(self)
+        except ValueError:
+            None
         glock.release()
     def pause(self):
         """Pause the sound temporarily"""
@@ -81,31 +149,38 @@ class Channel:
         if fadetime == 0:
             self.env = [[0, v]]
         else:
-            curv = calc_vol(self.pos, self.env)
-            self.env = [[self.pos, curv], [self.pos + fadetime, v]]
+            curv = calc_vol(self.src.pos, self.env)
+            self.env = [[self.src.pos, curv], [self.src.pos + fadetime, v]]
         glock.release()
     def get_volume(self):
         """Return current volume of sound"""
         glock.acquire()
-        v = calc_vol(self.pos, self.env)
+        v = calc_vol(self.src.pos, self.env)
         glock.release()
         return v
     def get_position(self):
         """Return current position of sound in samples"""
         glock.acquire()
-        p = self.pos
+        p = self.src.pos
         glock.release()
         return p
     def set_position(self, p):
         """Set current position of sound in samples"""
         glock.acquire()
-        self.pos = p
+        self.src.set_position(p)
         glock.release()
     def fadeout(self, time):
         """Schedule a fadeout of this sound in given time"""
         glock.acquire()
         self.set_volume(0.0, fadetime=time)
         glock.release()
+    def _get_samples(self, sz):
+        if not self.active: return None
+        v = calc_vol(self.src.pos, self.env)
+        z = self.src.get_samples(sz)
+        if self.src.done: self.done = True
+        return z * v
+
 
 
 def resample(smp, scale=1.0):
@@ -169,9 +244,21 @@ class Sound:
     """Represents a playable sound"""
 
     def __init__(self, filename=None, data=None):
-        """Create new sound from a WAV file or explicit sample data"""
+        """Create new sound from a WAV file, MP3 file, or explicit sample data"""
         assert(ginit == True)
-        if filename is not None:
+        # Three ways to construct Sound
+        # First is by passing data directly
+        if data is not None:
+            self.data = data
+            return
+        if filename is None:
+            assert False
+        # Second is through a file
+        self.data = None
+        # Load data from file into self.data
+        # Here's how to do it for WAV
+        # (Both of the loaders set nc to channels and fr to framerate
+        if filename[-3:] in ['wav','WAV']:
             wf = wave.open(filename, 'rb')
             #assert(wf.getsampwidth() == 2)
             nc = wf.getnchannels()
@@ -184,40 +271,70 @@ class Sound:
                 r = wf.readframes(4096)
                 data.append(r)
             if wf.getsampwidth() == 2:
-                self.data = numpy.fromstring(''.join(data), dtype=numpy.int16)
+                self.data = numpy.fromstring(''.join(data), 
+                                             dtype=numpy.int16)
             if wf.getsampwidth() == 4: 
-                self.data = numpy.fromstring(''.join(data), dtype=numpy.int32)
+                self.data = numpy.fromstring(''.join(data), 
+                                             dtype=numpy.int32)
                 self.data = self.data / 65536.0
             if wf.getsampwidth() == 1:
-                self.data = numpy.fromstring(''.join(data), dtype=numpy.uint8)
+                self.data = numpy.fromstring(''.join(data), 
+                                             dtype=numpy.uint8)
                 self.data = self.data * 256.0
             wf.close()
-            if fr != gsamplerate:
-                scale = gsamplerate * 1.0 / fr
-                if nc == 1:
-                    self.data = resample(self.data, scale)
-                if nc == 2:
-                    # for stereo resample independently
-                    left, right = uninterleave(self.data)
-                    nleft = resample(left, scale)
-                    nright = resample(right, scale)
-                    self.data = interleave(nleft, nright)
-            if nc != gchannels:
-                # oops, stereo-ness differs
-                # convert to match init parameters
-                if nc == 1:
-                    # came in mono, need stereo
-                    self.data = interleave(self.data, self.data)
-                if nc == 2:
-                    # came in stereo, need mono
-                    # first make it a 2d array
-                    left, right = uninterleave(self.data)
-                    self.data = stereo_to_mono(left, right)
-            return
-        if data is not None:
-            self.data = data
-            return
-        assert False
+        # Here's how to do it for MP3
+        if filename[-3:] in ['mp3','MP3']:
+            mf = mad.MadFile(filename)
+            # HACK ALERT
+            # Looks like MAD always gives us stereo
+            ##nc = mf.mode()
+            ##if nc == 0: nc = 1
+            nc = 2
+            self.framerate = mf.samplerate()
+            fr = mf.samplerate()
+            # read data
+            data = []
+            while True:
+                r = mf.read()
+                if r is None: break
+                data.append(r[:])
+            self.data = numpy.fromstring(''.join(data), dtype=numpy.int16)
+            del(mf)
+        if self.data is None:
+            assert False
+        # Resample if needed
+        if fr != gsamplerate:
+            scale = gsamplerate * 1.0 / fr
+            if nc == 1:
+                self.data = resample(self.data, scale)
+            if nc == 2:
+                # for stereo resample independently
+                left, right = uninterleave(self.data)
+                nleft = resample(left, scale)
+                nright = resample(right, scale)
+                self.data = interleave(nleft, nright)
+        # Stereo convert if necessary
+        if nc != gchannels:
+            # oops, stereo-ness differs
+            # convert to match init parameters
+            if nc == 1:
+                # came in mono, need stereo
+                self.data = interleave(self.data, self.data)
+            if nc == 2:
+                # came in stereo, need mono
+                # first make it a 2d array
+                left, right = uninterleave(self.data)
+                self.data = stereo_to_mono(left, right)
+        return
+
+    def get_length(self):
+        """Return the length of the sound in samples
+
+        To convert to seconds, divide by the samplerate and then divide
+        by 2 if in stereo.
+
+        """
+        return len(self.data)
 
     def play(self, volume=1.0, offset=0, fadein=0, envelope=None, loops=0):
         """Play the sound
@@ -241,7 +358,9 @@ class Sound:
                     env = [[0, volume]]
                 else:
                     env = [[offset, 0.0], [offset + fadein, volume]]
-        sndevent = Channel(self.data, offset, env, loops)
+        src = _SoundSourceData(self.data, loops)
+        src.pos = offset
+        sndevent = Channel(src, env)
         glock.acquire()
         gmixer_srcs.append(sndevent)
         glock.release()
@@ -263,6 +382,99 @@ class Sound:
          
          """
          self.data = resample(self.data, scale)
+
+class _Stream:
+    pass
+
+def _create_stream(filename, checks):
+    if filename[-3:] in ['wav','WAV']:
+        wf = wave.open(filename, 'rb')
+        if checks:
+            assert(wf.getsampwidth() == 2)
+            assert(wf.getnchannels() == gchannels)
+            assert(wf.getframerate() == gsamplerate)
+        # create stream object
+        stream = _Stream()
+        def str_read():
+            return wf.readframes(4096)
+        # give the stream object a read() method
+        stream.read = str_read
+        def str_seek_time(t):
+            if t == 0: wf.rewind()
+            assert(False) # unsupported for WAV streams
+        stream.seek_time = str_seek_time
+        return stream
+    # Here's how to do it for MP3
+    if filename[-3:] in ['mp3','MP3']:
+        mf = mad.MadFile(filename)
+        if checks:
+            assert(gchannels == 2) # MAD always returns stereo
+            assert(mf.samplerate() == gsamplerate)
+        stream = mf
+        return stream
+    assert(False) # filename must have wav or mp3 extension
+
+class StreamingSound:
+    """Represents a playable sound stream"""
+
+    def __init__(self, filename, checks=True):
+        """Create new streaming sound from a WAV file or an MP3 file
+
+        The new streaming sound must match the output samplerate
+        and stereo-ness.  You can turn off these checks by setting
+        the keyword checks=False, but the sound will be distorted.
+        
+        """
+        assert(ginit == True)
+        if filename is None:
+            assert False
+        self.filename = filename
+        self.checks = checks
+
+    def get_length(self):
+        """Return the length of the sound stream in samples
+
+        Only available for MP3 streams, not WAV ones.  To convert
+        result to seconds, divide by the samplerate and then divide by
+        2.
+
+        """
+        stream = _create_stream(self.filename, self.checks)
+        t = stream.total_time() * gsamplerate * 2 / 1000
+        del(stream)
+        return t
+
+    def play(self, volume=1.0, offset=0, fadein=0, envelope=None, loops=0):
+        """Play the sound stream
+
+        Keyword arguments:
+        volume - volume to play sound at
+        offset - sample to start playback
+        fadein - number of samples to slowly fade in volume
+        envelope - a list of [offset, volume] pairs defining
+                   a linear volume envelope
+        loops - how many times to play the sound (-1 is infinite)
+
+        """
+        stream = _create_stream(self.filename, self.checks)
+
+        if envelope != None:
+            env = envelope
+        else:
+            if volume == 1.0 and fadein == 0:
+                env = []
+            else:
+                if fadein == 0:
+                    env = [[0, volume]]
+                else:
+                    env = [[offset, 0.0], [offset + fadein, volume]]
+        src = _SoundSourceStream(stream, loops)
+        src.pos = offset
+        sndevent = Channel(src, env)
+        glock.acquire()
+        gmixer_srcs.append(sndevent)
+        glock.release()
+        return sndevent
 
 def calc_vol(t, env):
     """Calculate volume at time t given envelope env
@@ -354,7 +566,7 @@ def get_microphone():
     return numpy.fromstring(gmicdata, dtype=numpy.int16)
     
 def tick(extra=None):
-    """Main loop of mixer, mix and do audio IO.
+    """Main loop of mixer, mix and do audio IO
 
     Audio sources are mixed by addition and then clipped.  Too many
     loud sources will cause distortion.
@@ -365,42 +577,19 @@ def tick(extra=None):
     """
     global ginit
     global gmixer_srcs
+    rmlist = []
     if not ginit:
         return
     sz = gchunksize * gchannels
     b = numpy.zeros(sz, numpy.float)
-    rmlist = []
+    if glock is None: return # this can happen if main thread quit first
     glock.acquire()
     for sndevt in gmixer_srcs:
-        if sndevt.active:
-            pos = sndevt.pos
-            z = sndevt.data[pos:pos + sz]
-            sndevt.pos += sz
-            if len(z) < sz:
-                # oops, sample data didn't cover buffer
-                if sndevt.loops != 0:
-                    # loop around
-                    sndevt.loops -= 1
-                    sndevt.pos = sz - len(z)
-                    v = calc_vol(pos, sndevt.env)
-                    sndevt.env = [[0, v]]
-                    z = numpy.append(z, sndevt.data[:sz - len(z)])
-                else:
-                    # nothing to loop, just append zeroes
-                    z = numpy.append(z, numpy.zeros(sz - len(z), numpy.int16))
-                    # and stop the sample, it's done
-                    rmlist.append(sndevt)
-            if pos + sz == len(sndevt.data):
-                # this case loops without needing any appending
-                if sndevt.loops != 0:
-                    sndevt.loops -= 1
-                    sndevt.pos = 0
-                    v = calc_vol(pos, sndevt.env)
-                    sndevt.env = [[0, v]]
-                else:
-                    rmlist.append(sndevt)
-            v = calc_vol(pos, sndevt.env)
-            b += z * v
+        s = sndevt._get_samples(sz)
+        if s is not None:
+            b += s
+        if sndevt.done:
+            rmlist.append(sndevt)
     if extra is not None:
         b += extra
     b = b.clip(-32767.0, 32767.0)
@@ -411,9 +600,9 @@ def tick(extra=None):
         gmicdata = gmicstream.read(sz)
     glock.release()
     odata = (b.astype(numpy.int16)).tostring()
-    gstream.write(odata, sz)
+    gstream.write(odata, gchunksize)
 
-def init(samplerate=22050, chunksize=1024, stereo=True, microphone=False, input_device_index=None, output_device_index=None):
+def init(samplerate=44100, chunksize=1024, stereo=True, microphone=False, input_device_index=None, output_device_index=None):
     """Initialize mixer
 
     Must be called before any sounds can be played or loaded.
@@ -466,21 +655,24 @@ def init(samplerate=22050, chunksize=1024, stereo=True, microphone=False, input_
 
 def start():
     """Start separate mixing thread"""
+    global gthread
     def f():
         while True:
             tick()
             time.sleep(0.001)
-    thread.start_new_thread(f, ())
+    gthread = thread.start_new_thread(f, ())
 
 def quit():
     """Stop all playback and terminate mixer"""
     global ginit
+    glock.acquire()
     ginit = False
     if gstream is not None:
         gstream.close()
     if gmicstream is not None:
         gmicstream.close()
     gpyaudio.terminate()
+    glock.release()
 
 def set_chunksize(size=1024):
     """Set the audio chunk size for each frame of audio output
