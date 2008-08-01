@@ -51,6 +51,11 @@ For more information and options about using distutils, read:
 http://docs.python.org/inst/inst.html
 
 
+==DOCUMENTATION==
+
+This README file along with the [http://paranoidbrain.com/swmixer.html pydoc documentation] are the documentation for SWMixer.
+
+
 ==HOW CAN IT POSSIBLY WORK IN PYTHON?==
 
 Realtime mixing of sample data is done entirely in python using the
