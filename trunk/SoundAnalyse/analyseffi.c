@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <limits.h>
 
-/*
-#include <Numeric/arrayobject.h>
+/* Copyright 2008, Nathan Whitehead
+   Released under the LGPL
 */
 
 static PyObject *detect_pitch(PyObject *self, PyObject *args)
@@ -119,5 +119,4 @@ PyMODINIT_FUNC
 initanalyseffi(void)
 {
     (void) Py_InitModule("analyseffi", methods);
-    /*    import_array(); */
 }

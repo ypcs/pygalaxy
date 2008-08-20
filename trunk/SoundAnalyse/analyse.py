@@ -18,23 +18,24 @@ import analyseffi
 def loudness(chunk):
     '''Calculate and return volume of input samples
 
-    Input chunk should be an array of samples for analysis, as
+    Input chunk should be a numpy array of samples for analysis, as
     returned by sound card.  Sound card should be in 16-bit mono mode.
     Return value is measured in dB, will be from 0dB (maximum
-    loudness) down to -40dB (no sound).
+    loudness) down to -80dB (no sound).  Typical very loud sound will
+    be -1dB, typical silence is -36dB.
 
     '''
     data = numpy.array(chunk, dtype=float) / 32768.0
-    ms = numpy.sum(data ** 2.0) / len(data)
-    if ms < 0.0001: ms = 0.0001
+    ms = math.sqrt(numpy.sum(data ** 2.0) / len(data))
+    if ms < 10e-8: ms = 10e-8
     return 10.0 * math.log(ms, 10.0)
 
 
 def detect_pitch(chunk, min_frequency=82.0, max_frequency=1000.0, samplerate=44100.0, sens=0.1, ratio=5.0):
     '''Return the pitch present in a chunk of sampled sound
 
-    The chunk should be an array of samples from the soundcard, in
-    16-bit mono format.  The return value will either be None if no
+    The chunk should be a numpy array of samples from the soundcard,
+    in 16-bit mono format.  The return value will either be None if no
     pitch could be detected, or a frequency in Hz if a pitch was
     detected.  The chunk should be at least 1024 bytes long for
     accurate pitch detection of lower frequencies.
@@ -52,7 +53,6 @@ def detect_pitch(chunk, min_frequency=82.0, max_frequency=1000.0, samplerate=441
             higher numbers are more stringent (default: 5.0)
 
     '''
-    global previous_pitch
     chunk2 = chunk.data[:]
     # Call C function to do work for us
     dp = analyseffi.detect_pitch(chunk2, min_frequency, max_frequency, samplerate, sens, ratio)
@@ -67,8 +67,8 @@ _previous_pitch = None
 def musical_detect_pitch(chunk, min_note=40.0, max_note=84.0, samplerate=44100, sens=0.1, ratio=5.0, smooth=1.0):
     '''Return the pitch present in a chunk of sampled sound
 
-    The chunk should be an array of samples from the soundcard, in
-    16-bit mono format.  The return value will either be None if no
+    The chunk should be a numpy array of samples from the soundcard,
+    in 16-bit mono format.  The return value will either be None if no
     pitch could be detected, or a midi note number if a pitch was
     detected.  The chunk should be at least 1024 bytes long for
     accurate pitch detection of lower frequencies.  The return value
@@ -90,13 +90,13 @@ def musical_detect_pitch(chunk, min_note=40.0, max_note=84.0, samplerate=44100, 
     smooth - how much to smooth output (default: 1.0)
     
     '''
-
+    global _previous_pitch
     freq = detect_pitch(chunk, 
                         min_frequency=pitch_from_midinum(min_note),
                         max_frequency=pitch_from_midinum(max_note),
                         samplerate=samplerate,
                         sens=sens,
-                        smooth=smooth)
+                        ratio=ratio)
     if freq is not None:
         freq = midinum_from_pitch(freq)
         if smooth == 0.0: return freq
@@ -108,7 +108,7 @@ def musical_detect_pitch(chunk, min_note=40.0, max_note=84.0, samplerate=44100, 
             # So if freq changes by smooth, weight old and new equally
             # Theory is that large pitch changes need to be tracked quickly
             # Small pitch changes are just noise to be smoothed out
-            a = (freq - previous_pitch) ** 2.0 / smooth
+            a = (freq - _previous_pitch) ** 2.0 / smooth
             # alpha is 0.0 to 1.0, blend from previous to new freq
             alpha = 1.0 / (a + 1.0)
             _previous_pitch = _previous_pitch * alpha + freq * (1.0 - alpha)
