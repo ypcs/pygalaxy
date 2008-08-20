@@ -86,8 +86,8 @@ while True:
 }}}
 
 The return value for loudness is in decibels.  The range is 0dB for
-the maximally loud sounds down to -80dB for silence.  Typical very
-loud sounds are -4dB and typical silence is -78dB.
+the maximally loud sounds down to -40dB for silence.  Typical very
+loud sounds are -1dB and typical silence is -36dB.
 
 For the pitch detection, the return value of musical_detect_pitch
 is a midi note number.  Middle C is 60.  The return value will either
