@@ -56,13 +56,71 @@ http://people.csail.mit.edu/hubert/pyaudio/
 Other audio libraries or techniques should also work.  The important
 thing is to convert the sound data into a NumPy 16-bit mono array.
 
-Here is an example that shows the loudness function:
+Here is an example that shows the loudness and musical pitch detection
+functions:
+
 {{{
+import numpy
 import pyaudio
 import analyse
 
+# Initialize PyAudio
+pyaud = pyaudio.PyAudio()
 
+# Open input stream, 16-bit mono at 44100 Hz
+# On my system, device 2 is a USB microphone, your number may differ.
+stream = pyaud.open(
+    format = pyaudio.paInt16,
+    channels = 1,
+    rate = 44100,
+    input_device_index = 2,
+    input = True)
+
+while True:
+    # Read raw microphone data
+    rawsamps = stream.read(1024)
+    # Convert raw data to NumPy array
+    samps = numpy.fromstring(rawsamps, dtype=numpy.int16)
+    # Show the volume and pitch
+    print analyse.loudness(samps), analyse.musical_detect_pitch(samps)
 }}}
+
+The return value for loudness is in decibels.  The range is 0dB for
+the maximally loud sounds down to -80dB for silence.  Typical very
+loud sounds are -4dB and typical silence is -78dB.
+
+For the pitch detection, the return value of musical_detect_pitch
+is a midi note number.  Middle C is 60.  The return value will either
+be None or a floating point number that represents a pitch.  For example,
+a return value of 60.5 is half a semitone above middle C.
+
+There is also a version of the pitch detection function, detect_pitch,
+that returns the pitch in Hz.  Both musical_detect_pitch and detect_pitch
+take several extra arguments to control their behavior.  For pitch detection
+in human singing range for data sampled at 44100 Hz, the default values
+for these extra keyword arguments should work without modification.  
+
+A good size chunk for pitch detection is 1024 samples.  Larger chunks
+return pitches that are more precise, but you will get fewer results
+in a given time interval with larger chunks.  This means larger chunks
+cannot track changing pitches as well.  Smaller chunks can quickly track
+changing pitches but yield less precise pitches.  Smaller chunks cannot
+recognize lower pitches.
+
+
+==HOW IT WORKS==
+
+Loudness is a simple power calculation using a root-mean-squared operation.
+
+Pitch detection uses Average Magnitude Difference Function (AMDF).  The idea
+is to compare windows of data of the same length but offset by some number
+of samples.  For each offset calculate the average absolute value difference
+of the samples.  Pick the offset that gives the smallest average difference.
+This offset is the period, invert to get the frequency of the detected pitch.
+
+There are some subtleties.  There will actually be many dips in the
+amdf graph.  We want the first big dip.  Later big dips are harmonics
+of the fundamental frequency.
 
 
 ==BUGS AND LIMITATIONS==
