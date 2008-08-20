@@ -62,7 +62,7 @@ def detect_pitch(chunk, min_frequency=82.0, max_frequency=1000.0, samplerate=441
     return None
 
 
-previous_pitch = None
+_previous_pitch = None
 
 def musical_detect_pitch(chunk, min_note=40.0, max_note=84.0, samplerate=44100, sens=0.1, ratio=5.0, smooth=1.0):
     '''Return the pitch present in a chunk of sampled sound
@@ -100,8 +100,8 @@ def musical_detect_pitch(chunk, min_note=40.0, max_note=84.0, samplerate=44100, 
     if freq is not None:
         freq = midinum_from_pitch(freq)
         if smooth == 0.0: return freq
-        if previous_pitch is None:
-            previous_pitch = freq
+        if _previous_pitch is None:
+            _previous_pitch = freq
         else:
             # a is weight of new frequency 
             #   as compared to weight of old freq (which is 1.0)
@@ -111,12 +111,12 @@ def musical_detect_pitch(chunk, min_note=40.0, max_note=84.0, samplerate=44100, 
             a = (freq - previous_pitch) ** 2.0 / smooth
             # alpha is 0.0 to 1.0, blend from previous to new freq
             alpha = 1.0 / (a + 1.0)
-            previous_pitch = previous_pitch * alpha + freq * (1.0 - alpha)
-            return previous_pitch
+            _previous_pitch = _previous_pitch * alpha + freq * (1.0 - alpha)
+            return _previous_pitch
     else:
         # No pitch detected
-        freq = previous_pitch
-        previous_pitch = None
+        freq = _previous_pitch
+        _previous_pitch = None
         return freq
 
 def midinum_from_pitch(freq):

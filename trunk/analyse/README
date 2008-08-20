@@ -1,4 +1,4 @@
-=Analyse=
+=SoundAnalyse=
 ==Analyse sound chunks==
 
 Copyright 2008, Nathan Whitehead
@@ -21,13 +21,13 @@ http://numpy.scipy.org/
 ==DOWNLOAD==
 
 A source distribution is available at PyPI:
-http://pypi.python.org/pypi/analyse
+http://pypi.python.org/pypi/SoundAnalyse
 
 
 ==INSTALLATION==
 
-Analyse is packaged as Python and C source using distutils.  To install,
-run the following command as root:
+SoundAnalyse is packaged as Python and C source using distutils.  To
+install, run the following command as root:
 
 python setup.py install
 
@@ -42,12 +42,15 @@ http://docs.python.org/inst/tweak-flags.html
 ==DOCUMENTATION==
 
 This README file along with the pydoc documentation in the doc/
-directory are the documentation for Analyse.
+directory are the documentation for SoundAnalyse.
 
 
 ==EXAMPLES==
 
-To use this package you first need a sound source.  Lets get sound data from the microphone using PyAudio:
+The package is imported with 'import analyse'.
+
+To use this package you first need a sound source.  Lets get sound
+data from the microphone using PyAudio:
 http://people.csail.mit.edu/hubert/pyaudio/
 
 Other audio libraries or techniques should also work.  The important
