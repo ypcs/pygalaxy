@@ -1,0 +1,70 @@
+=Analyse=
+==Analyse sound chunks==
+
+Copyright 2008, Nathan Whitehead
+Released under the LGPL
+
+This module provides functions to analyse sound chunks to detect
+loudness and pitch.  It also includes some utility functions for
+converting midi note numbers to and from frequencies.  Designed for
+realtime microphone input for singing games.
+
+
+==REQUIREMENTS==
+
+Working C compiler compatible with your python installation
+
+NumPy 1.0 (or more recent)
+http://numpy.scipy.org/
+
+
+==DOWNLOAD==
+
+A source distribution is available at PyPI:
+http://pypi.python.org/pypi/analyse
+
+
+==INSTALLATION==
+
+Analyse is packaged as Python and C source using distutils.  To install,
+run the following command as root:
+
+python setup.py install
+
+For more information and options about using distutils, read:
+http://docs.python.org/inst/inst.html
+
+Because this package needs a C compiler, you may need to tweak some
+flags to get things to work.  Take a look at this section:
+http://docs.python.org/inst/tweak-flags.html
+
+
+==DOCUMENTATION==
+
+This README file along with the pydoc documentation in the doc/
+directory are the documentation for Analyse.
+
+
+==EXAMPLES==
+
+To use this package you first need a sound source.  Lets get sound data from the microphone using PyAudio:
+http://people.csail.mit.edu/hubert/pyaudio/
+
+Other audio libraries or techniques should also work.  The important
+thing is to convert the sound data into a NumPy 16-bit mono array.
+
+Here is an example that shows the loudness function:
+{{{
+import pyaudio
+import analyse
+
+
+}}}
+
+
+==BUGS AND LIMITATIONS==
+
+Pitch detection is not perfect, especially for sss and shhh sounds.
+Some singers get wrong octave with some styles of singing.
+
+Low-level code is fast but may not be realtime for very slow computers.
