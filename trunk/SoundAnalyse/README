@@ -1,5 +1,5 @@
 =SoundAnalyse=
-==Analyse sound chunks==
+==Analyse sound chunks, realtime pitch detection==
 
 Copyright 2008, Nathan Whitehead
 Released under the LGPL
@@ -129,3 +129,6 @@ Pitch detection is not perfect, especially for sss and shhh sounds.
 Some singers get wrong octave with some styles of singing.
 
 Low-level code is fast but may not be realtime for very slow computers.
+
+Pitch detection only works for single sources, does not work on polyphonic
+sounds.
