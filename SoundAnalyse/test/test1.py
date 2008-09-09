@@ -6,12 +6,12 @@ import analyse
 pyaud = pyaudio.PyAudio()
 
 # Open input stream, 16-bit mono at 44100 Hz
-# On my system, device 2 is a USB microphone, your number may differ.
+# On my system, device 1 is a USB microphone, your number may differ.
 stream = pyaud.open(
     format = pyaudio.paInt16,
     channels = 1,
     rate = 44100,
-    input_device_index = 2,
+    input_device_index = 1,
     input = True)
 
 while True:
