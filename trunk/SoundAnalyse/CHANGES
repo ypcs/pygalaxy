@@ -1,0 +1,9 @@
+2008/9/9 Version 0.1.1
+
+GIL released properly in C code for multiple threads.
+Memory leak fixed.
+Portability improvements in C code.
+
+2008/8/20 Version 0.1.0
+
+Initial import
