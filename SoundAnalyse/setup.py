@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 
 setup(name = "SoundAnalyse",
-      version = "0.1.0",
+      version = "0.1.1",
       author = "Nathan Whitehead",
       author_email = "nwhitehe@gmail.com",
       url = "http://code.google.com/p/pygalaxy/",
