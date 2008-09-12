@@ -207,9 +207,9 @@ class DistributedState():
         guarantee that all elements will be inserted.
 
         This function cannot guarantee that two instances will not
-        simultaneously create a new value.  To ensure absolute
-        consistency, create default values before distributing
-        multiple instances of the application.
+        simultaneously create a new value.  If you need absolute
+        consistency in this case, create default values in the state
+        before distributing multiple instances of the application.
 
         '''
         try:

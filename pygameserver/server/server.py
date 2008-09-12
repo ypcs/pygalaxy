@@ -150,12 +150,18 @@ class UpdateState(webapp.RequestHandler):
         inst.put()
         self.response.out.write('OK\n')
 
+class Login(webapp.RequestHandler):
+    def get(self):
+        self.response.out.write('Biotch\n')
+        self.response.out.write('<html><body><a href="%s">login</a></body></html>' % users.create_login_url('/'))
+
 application = webapp.WSGIApplication([
         ('/get', GetState),
         ('/keys', KeysState),
         ('/set', SetState),
         ('/del', DelState),
         ('/update', UpdateState),
+        ('/login', Login),
         ], debug=True)
 
 def main():
