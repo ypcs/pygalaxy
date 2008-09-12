@@ -1,0 +1,106 @@
+import md5
+
+from google.appengine.api import users
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext import db
+
+class AppDataInstance(db.Model):
+    appid = db.StringProperty(multiline=False)
+    date = db.DateTimeProperty(auto_now_add=True)
+    data = db.TextProperty()
+
+class GetKey(webapp.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain' 
+        appid = self.request.get('appid')
+        if appid == '':
+            self.response.out.write('ERROR\nMust specify appid')
+            return
+        results = AppDataInstance.all()
+        results.filter('appid =', appid)
+        list_results = []
+        for result in results:
+            list_results.append(result)
+        if len(list_results) == 0:
+            inst = AppDataInstance()
+            inst.appid = appid
+            inst.data = ''
+            inst.put()
+            self.response.out.write(str(inst.key()) + '\n')
+            self.response.out.write('CREATE ' + appid + '\n')
+            return
+        if len(list_results) == 1:
+            inst = list_results[0]
+            self.response.out.write(str(inst.key()))
+            return
+        self.response.out.write('ERROR\n')
+        self.response.out.write('More than one key found for this application (appid: %s)\n' % appid)
+
+class SetState(webapp.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain' 
+        self.response.out.write('ERROR\nMust use POST method\n')
+    def post(self):
+        self.response.headers['Content-Type'] = 'text/plain' 
+        key = self.request.get('key')
+        content = self.request.get('content')
+        if key == '':
+            self.response.out.write('ERROR\nMust specify key')
+            return
+        if len(content) > 100000:
+            self.response.out.write('ERROR\nState too long')
+            return
+        inst = db.get(db.Key(key))
+        inst.data = content
+        inst.put()
+        self.response.out.write('OK\n')
+
+class UpdateState(webapp.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain' 
+        self.response.out.write('ERROR\nMust use POST method\n')
+    def post(self):
+        self.response.headers['Content-Type'] = 'text/plain' 
+        key = self.request.get('key')
+        oldhash = self.request.get('old')
+        content = self.request.get('content')
+        if key == '':
+            self.response.out.write('ERROR\nMust specify key')
+            return
+        if len(content) > 100000:
+            self.response.out.write('ERROR\nState too long')
+            return
+        inst = db.get(db.Key(key))
+        # Calculate MD5 hash of old state
+        oldstatehash = md5.new(inst.data).hexdigest()
+        # Compare to hash we got
+        if oldhash != oldstatehash:
+            self.response.out.write('FAIL\nState does not match digest given')
+            return
+        inst.data = content
+        inst.put()
+        self.response.out.write('OK\n')
+
+class GetState(webapp.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain' 
+        key = self.request.get('key')
+        if key == '':
+            self.response.out.write('ERROR\nMust specify key')
+            return
+        inst = db.get(db.Key(key))
+        self.response.out.write(inst.data)
+
+application = webapp.WSGIApplication([
+        ('/getkey', GetKey),
+        ('/set', SetState),
+        ('/get', GetState),
+        ('/update', UpdateState),
+        ], debug=True)
+
+def main():
+  run_wsgi_app(application)
+
+if __name__ == "__main__":
+  main()

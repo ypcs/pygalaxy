@@ -1,0 +1,211 @@
+=Distributed Application Shared State=
+
+This module allows your Python programs to easily have a persistent
+global distributed shared state.  This state can be used to store
+things like number of users, game high scores, message of the day from
+the author, etc.  The state has an interface like a dictionary with
+some additional synchronization functionality and some restrictions.
+This module connects to a server on the Google App Engine to store and
+manage data.
+
+
+==How to use==
+
+First you need to initialize the connection to Google App Engine.  Do
+this by creating a DistributedState object with an application id that
+is unique to your application.  Every instance of your application
+will use the same application id.
+    
+Recommended naming scheme for appid: 
+(your name OR your domain name) PLUS application name
+
+So one of my hypothetical application ids is:
+NathanWhitehead+AstroMaxBlaster
+
+Create the DistributedState object like this:
+{{{
+state = appstate.DistributedState('appid')
+}}}
+
+The simplest way to use the distributed state object is to treat it
+like a dictionary.  You can store values into the state using:
+
+{{{
+state['key'] = value
+}}}
+
+The key must be a string of reasonable size without linebreaks.  The
+values you can store in the state are any python data value, but they
+must be 100K or less in size after being serialized and encoded into a
+string.  To check the size of a value, use:
+
+{{{
+length_data(value)
+}}}
+
+To retrieve stored values, use:
+
+{{{
+state['key']
+}}}
+
+If no value has been stored under that key, this will raise a KeyError
+exception.
+
+You can delete keys using del:
+
+{{{
+del state['key']
+}}}
+
+You can get a list of all defined keys using the keys() method:
+
+{{{
+state.keys()
+}}}
+
+
+===Message of the Day===
+
+A very simple example is a 'message of the day' feature.  This
+application retrieves the state and displays it.
+
+{{{
+import appstate
+
+state = appstate.DistributedState('testing+motd')
+motd = state['motd']
+print motd
+# now do rest of application
+}}}
+
+You, the author of the application, then set the message of the day
+each day with:
+
+{{{
+import appstate
+
+state = appstate.DistributedState('testing+motd')
+state['motd'] = 'Version 2.7 just came out!!  New features!'
+}}}
+
+
+===Updating state===
+
+Just using direct dictionary operations is not a good idea for
+applications that will have more than one person updating values.
+For example, suppose the state keeps track of a number representing
+how many times the application has been run anywhere.  When the
+application starts up it might run something like
+state['count'] = state['count'] + 1.
+
+But what if two different people run the application at the same
+time?  Both of them evaluate state['count'] and get 102.  They both
+increment to get 103, then they both set the count to 103.  But
+that's wrong, the count should go to 104 since two copies of the
+application started.
+
+Here's the BAD counting application:
+{{{
+import appstate
+
+state = appstate.DistributedState('testing+counter')
+
+def incr_count():
+    try:
+        old = state['count']
+        new = old + 1
+        state['count'] = new
+    except KeyError:
+        state['count'] = 1
+
+incr_count()
+print state['count']
+}}}
+
+In Linux you can see the bad behavior by running two copies simultaneously:
+{{{
+python test/counter_bad.py & python test/counter_bad.py &
+}}}
+
+The solution is to use update().  When you call update()
+you give a hash of the previous version of the value you are updating
+along with your new value.  If everything goes well the value will
+update.  If someone else has beaten you to changing the value, the
+hash value you passed will not match and the function will raise an
+exception UpdateFailedError.  You can get the new value and try again.
+
+For the example, both applications try to update from 102->103.
+One of them succeeds but the other one has to fail.  The one
+that fails rereads the updated count (103), increments it to 104,
+and then tries to update 103->104.  If no one else has beaten
+the application again then the update will succeed.
+
+Here's the GOOD counting application:
+{{{
+import appstate
+
+state = appstate.DistributedState('testing+counter')
+
+def incr_count():
+    try:
+        old = state['count']
+        new = old + 1
+        oldhash = appstate.hash_value(old)
+        state.update('count', oldhash, new)
+    except appstate.UpdateFailedError:
+        incr_count() # try again
+    except KeyError:
+        state['count'] = 1
+
+incr_count()
+print state['count']
+}}}
+
+To help automate the process you can use apply_op() instead of
+worrying about catching exceptions and retrying operations. To use
+apply_op(), you must define a function on python values that will
+be applied.  The function you write must take exactly one argument,
+the input value, and return one value, the output value. 
+
+Some optional keyword arguments control how apply_op() deals with
+missing keys: 'create' is a boolean that indicates to create
+new values for the key, and 'defaultvalue' indicates what value
+to use.
+
+Here is the good counting example rewritten to use apply_op().
+{{{
+import appstate
+
+state = appstate.DistributedState('testing+counter')
+
+def inc(x):
+    return x + 1
+
+state.apply_op('count', inc, create=True, defaultvalue=1)
+print state['count']
+}}}
+
+
+==Security==
+
+NOTE THAT THERE IS NO SECURITY!
+
+There is no security.  Users of your application do not need accounts
+to update the distributed state.  This means that users may change the
+state to any value.  If you are using the state to record high scores,
+players can hack your program and give themselves the high score.
+
+A future version of this module may have more sophisticated security
+features.  Until then, think of this package like Wikipedia.  The
+point is to allow people to collaborate and do something cool with a 
+minimum amount of distruption due to morons.  To that end, use the
+'backup' command line option to save the application state often.
+Use the 'restore' command to revert the state to a previous value
+if you see any malicious activity.
+
+An implication: you should NEVER put python code into the state
+and then evaluate it.  You should NEVER put text into the state
+that will in any way be interpreted as characters going to a shell.
+In general, be PARANOID about interpretting data in the state.
+
