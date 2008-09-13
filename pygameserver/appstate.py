@@ -15,7 +15,8 @@ import urllib
 import md5
 import pickle
 
-SERVER = 'localhost:8080'
+#SERVER = 'localhost:8080' # for the dev server
+SERVER = 'pygameserver.appspot.com'
 
 class UnexpectedError(exceptions.Exception): pass
 class UpdateFailedError(exceptions.Exception): pass
