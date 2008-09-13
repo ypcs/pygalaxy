@@ -1,167 +1,246 @@
 import md5
 import pickle
+import logging
 
 from google.appengine.api import users
+from google.appengine.api import memcache
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-class AppDataInstance(db.Model):
+VERSION = 'Version 0.4'
+
+# How big can one entry in application table be?
+SINGLE_SIZE_LIMIT = 32000
+
+class Application(db.Model):
+    '''Information about a client application'''
     appid = db.StringProperty(multiline=False)
+    admin = db.UserProperty()
+    readmode = db.IntegerProperty()
+    # 0 = anyone can read
+    # 1 = only admin can read
+    # 2 = anyone logged in, authorized, can read
+    # 3 = anyone logged in, not banned, can read
+    writemode = db.IntegerProperty()
+    # 0-3, same as readmode but for writing
+
+class AppDataInstance(db.Model):
+    appref = db.ReferenceProperty(Application)
     shelfkey = db.StringProperty(multiline=False)
     shelfdata = db.TextProperty()
+    datalen = db.IntegerProperty()
+    who = db.UserProperty()
 
-def getinst(appid, key, create=True):
-    results = AppDataInstance.all()
-    results.filter('appid =', appid)
-    results.filter('shelfkey =', key)
-    list_results = []
-    for result in results:
-        list_results.append(result)
-    if len(list_results) == 0:
-        if create:
-            inst = AppDataInstance()
-            inst.appid = appid
-            inst.shelfkey = key
-            inst.shelfdata = ''
-            inst.put()
-            return inst
-        raise KeyError
-    if len(list_results) == 1:
-        return list_results[0]
-    raise KeyError
+class AuthorizedUser(db.Model):
+    appref = db.ReferenceProperty(Application)
+    who = db.UserProperty()
+    
+class BannedUser(db.Model):
+    appref = db.ReferenceProperty(Application)
+    who = db.UserProperty()
 
-class GetState(webapp.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain' 
-        appid = self.request.get('appid')
-        if appid == '':
-            self.response.out.write('ERROR\nMust specify appid')
-            return
-        key = self.request.get('key')
-        if key == '':
-            self.response.out.write('ERROR\nMust specify key')
-            return
-        try:
-            inst = getinst(appid, key, create=False)
-            self.response.out.write(inst.shelfdata)
-            return
-        except KeyError:
-            self.response.out.write('ERROR\n')
-            self.response.out.write('Wrong number of keys found for this application %s:%s\n' % (appid, key))
-            return
+# Functions that benefit from being cached
+def lookup_app(appkey):
+    data = memcache.get(appkey)
+    if data is not None: return data
+    try:
+        data = db.get(db.Key(appkey))
+        if not memcache.add(appkey, data, 60 * 60 ): # 1 hour expire time
+            logging.error('memcache add() failed for appkey')
+        return data
+    except:
+        return None
+def can_do(appl, mode, who):
+    if mode == 0: return True
+    if mode == 1: return (who == appl.admin)
+    if mode == 2:
+        auth = AuthorizedUser.all().filter('appref =', appl).filter('who =', who).get()
+        return (auth is not None)
+    if mode == 3:
+        ban = BannedUser.all().filter('appref =', appl).filter('who =', who).get()
+        return (ban is None)
+    return False
+def can_read(appl, who):
+    memcachekey = 'R' + str(appl.key()) + ':' + str(who)
+    data = memcache.get(memcachekey)
+    if data is not None: return data
+    data = can_do(appl, appl.readmode, who)
+    if not memcache.add(memcachekey, data, 60 * 10):
+        logging.error('memcache add() failed for read perm')
+    return data
+def can_write(appl, who): 
+    memcachekey = 'W' + str(appl.key()) + ':' + str(who)
+    data = memcache.get(memcachekey)
+    if data is not None: return data
+    data = can_do(appl, appl.writemode, who)
+    if not memcache.add(memcachekey, data, 60 * 10):
+        logging.error('memcache add() failed for write perm')
+    return data
 
-class KeysState(webapp.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain' 
-        appid = self.request.get('appid')
-        if appid == '':
-            self.response.out.write('ERROR\nMust specify appid')
-            return
-        results = AppDataInstance.all()
-        results.filter('appid =', appid)
-        keys = []
-        for result in results:
-            if result.shelfkey is not None:
-                keys.append(result.shelfkey)
-        self.response.out.write(pickle.dumps(keys))
 
-class SetState(webapp.RequestHandler):
+# Process requests
+
+def Process(cmd, arg1, arg2, arg3):
+    '''Process PythonRemoteProcedureCall request
+
+    input: Python data coming in
+    Returns Python data going out.
+
+    '''
+    user = users.get_current_user()
+    if cmd == 'version':
+        return VERSION
+    if cmd == 'registerapp':
+        appid = arg1
+        # Make sure logged in
+        if user is None:
+            return '!!!!!must be logged in'
+        # Check if appid is already in use
+        prevapp = Application.all().filter('appid =', appid).get()
+        if prevapp is not None:
+            return '!!!!!appid in use'
+        app = Application()
+        app.appid = arg1
+        app.admin = user
+        app.readmode = int(arg2)
+        app.writemode = int(arg3)
+        app.put()
+        return 'OK'
+    if cmd == 'deleteapp':
+        appkey = arg1
+        # Make sure logged in
+        if user is None:
+            return '!!!!!must be logged in'
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if user != appl.admin:
+            return '!!!!!you must be admin'
+        appl.delete()
+        return 'OK'
+    if cmd == 'getapp':
+        appid = arg1
+        # Retrieve key of application
+        app = Application.all().filter('appid =', appid).get()
+        if app is None:
+            return '!!!!!appid not found'
+        return str(app.key())
+    if cmd == 'authorize':
+        appkey = arg1
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if user != appl.admin:
+            return '!!!!!you must be admin'
+        auser = users.User(arg2)
+        if auser is None:
+            # Currently this doesn't happen, invalid emails
+            # create ghost User objects
+            return '!!!!!user email not found'
+        prevauth = AuthorizedUser.all().filter('appref =', appl).filter('who =', auser).get()
+        if prevauth is not None:
+            return '!!!!!already authorized'
+        authuser = AuthorizedUser(appref=appl, who=auser)
+        authuser.put()
+        # Clear permissions cache
+        memcache.delete('R' + str(appl.key()) + ':' + str(auser))
+        memcache.delete('W' + str(appl.key()) + ':' + str(auser))
+        return 'OK'
+    if cmd == 'ban':
+        appkey = arg1
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if user != appl.admin:
+            return '!!!!!you must be admin'
+        auser = users.User(arg2)
+        if auser is None:
+            # Currently this doesn't happen, invalid emails
+            # create ghost User objects
+            return '!!!!!user email not found'
+        prevban = BannedUser.all().filter('appref =', appl).filter('who =', auser).get()
+        if prevban is not None:
+            return '!!!!!already banned'
+        banuser = BannedUser(appref=appl, who=auser)
+        banuser.put()
+        # Clear permissions cache
+        memcache.delete('R' + str(appl.key()) + ':' + str(auser))
+        memcache.delete('W' + str(appl.key()) + ':' + str(auser))
+        return 'OK'
+    if cmd == 'get':
+        appkey = arg1
+        shelfkey = arg2
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if not can_read(appl, user):
+            return '!!!!!no permission to read'
+        # First check the cache
+        memcachekey = 'K' + str(appl.key()) + ':' + shelfkey
+        data = memcache.get(memcachekey)
+        if data is not None: return data
+        # Not in cache, do a query
+        appinst = AppDataInstance.all().filter('appref =', appl).filter('shelfkey =', shelfkey).get()
+        if appinst is None: data = ''
+        else: data = str(appinst.shelfdata)
+        if not memcache.add(memcachekey, data, 60 * 60):
+            logging.error('error adding memcache in get()')
+        return data
+    if cmd == 'set':
+        appkey = arg1
+        shelfkey = arg2
+        shelfdata = arg3
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if not can_write(appl, user):
+            return '!!!!!no permission to write'
+        if len(shelfdata) > SINGLE_SIZE_LIMIT:
+            return '!!!!!too big'
+        appinst = AppDataInstance.all().filter('appref =', appl).filter('shelfkey =', shelfkey).get()
+        if appinst is None:
+            appinst = AppDataInstance()
+            appinst.appref = appl
+            appinst.shelfkey = shelfkey
+        appinst.shelfdata = shelfdata
+        appinst.datalen = len(shelfdata)
+        appinst.who = user
+        appinst.put()
+        memcachekey = 'K' + str(appl.key()) + ':' + shelfkey
+        memcache.delete(memcachekey)
+        return 'OK'
+    if cmd == 'memcache':
+        stats =  memcache.get_stats()
+        return '%d hits\n%d misses\n' % (stats['hits'], stats['misses'])
+    return '!!!!!unknown command'
+
+class Prpc(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain' 
         self.response.out.write('ERROR\nMust use POST method\n')
     def post(self):
         self.response.headers['Content-Type'] = 'text/plain' 
-        appid = self.request.get('appid')
-        if appid == '':
-            self.response.out.write('ERROR\nMust specify appid')
-            return
-        key = self.request.get('key')
-        if key == '':
-            self.response.out.write('ERROR\nMust specify key')
-            return
-        content = self.request.get('content')
-        if len(content) > 100000:
-            self.response.out.write('ERROR\nState too long')
-            return
-        try:
-            inst = getinst(appid, key, create=True)
-            inst.shelfdata = content
-            inst.put()
-            self.response.out.write('OK\n')
-        except KeyError:
-            self.response.out.write('ERROR\n')
-            self.response.out.write('Wrong number of keys found for this application %s:%s\n' % (appid, key))
-            return
+        cmd = self.request.get('cmd')
+        arg1 = self.request.get('arg1')
+        arg2 = self.request.get('arg2')
+        arg3 = self.request.get('arg3')
+        #try:
+        resp = Process(cmd, arg1, arg2, arg3)
+        #except:
+        #    self.response.out.write('!!!!!process')
+        #    return
+        self.response.out.write(resp)
 
-class DelState(webapp.RequestHandler):
+class Version(webapp.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/plain' 
-        self.response.out.write('ERROR\nMust use POST method\n')
+        self.response.out.write(VERSION + '<br>\n')
     def post(self):
-        self.response.headers['Content-Type'] = 'text/plain' 
-        appid = self.request.get('appid')
-        if appid == '':
-            self.response.out.write('ERROR\nMust specify appid')
-            return
-        key = self.request.get('key')
-        if key == '':
-            self.response.out.write('ERROR\nMust specify key')
-            return
-        try:
-            inst = getinst(appid, key, create=False)
-            inst.delete()
-            self.response.out.write('OK\n')
-        except KeyError:
-            self.response.out.write('ERROR\n')
-            self.response.out.write('Wrong number of keys found for this application %s:%s\n' % (appid, key))
-            return
-
-class UpdateState(webapp.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain' 
-        self.response.out.write('ERROR\nMust use POST method\n')
-    def post(self):
-        self.response.headers['Content-Type'] = 'text/plain' 
-        appid = self.request.get('appid')
-        if appid == '':
-            self.response.out.write('ERROR\nMust specify appid')
-            return
-        key = self.request.get('key')
-        if key == '':
-            self.response.out.write('ERROR\nMust specify key')
-            return
-        oldhash = self.request.get('old')
-        if oldhash == '':
-            self.response.out.write('ERROR\nMust specify oldhash')
-            return
-        content = self.request.get('content')
-        if len(content) > 100000:
-            self.response.out.write('ERROR\nState too long')
-            return
-        inst = getinst(appid, key)
-        # Calculate MD5 hash of old state
-        oldstatehash = md5.new(inst.shelfdata).hexdigest()
-        # Compare to hash we got
-        if oldhash != oldstatehash:
-            self.response.out.write('FAIL\nState does not match digest given')
-            return
-        inst.shelfdata = content
-        inst.put()
-        self.response.out.write('OK\n')
-
-class Login(webapp.RequestHandler):
-    def get(self):
-        self.response.out.write('Biotch\n')
-        self.response.out.write('<html><body><a href="%s">login</a></body></html>' % users.create_login_url('/'))
+        self.response.out.write(VERSION + '<br>\n')
 
 application = webapp.WSGIApplication([
-        ('/get', GetState),
-        ('/keys', KeysState),
-        ('/set', SetState),
-        ('/del', DelState),
-        ('/update', UpdateState),
-        ('/login', Login),
+        ('/prpc', Prpc),
+        ('/version', Version),
         ], debug=True)
 
 def main():
