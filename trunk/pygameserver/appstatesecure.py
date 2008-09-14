@@ -24,13 +24,14 @@ import rencode
 import prpc
 
 class SizeError(Exception): pass
+class DataUnchangedError(Exception): pass
 class DuplicateError(Exception): pass
 class PermissionError(Exception): pass
 class UnjoinedError(Exception): pass
 class LoginError(Exception): pass
 class AppIdError(Exception): pass
-class UnexpectedError(Exception): pass
 class UpdateFailedError(Exception): pass
+class UnexpectedError(Exception): pass
 
 ANY = 0
 ADMIN_ONLY = 1
@@ -87,6 +88,12 @@ class DistributedState():
 
     # Administrative functions
 
+    def version(self):
+        '''Get version string returned by server'''
+        resp = self.serv.send('version')
+        if resp[:5] == '!!!!!': raise UnexpectedError
+        return resp
+
     def login(self, email, password):
         '''Login to Google account
 
@@ -131,9 +138,8 @@ class DistributedState():
         So one of my hypothetical application ids is:
         NathanWhitehead+AstroMaxBlaster
 
-        The readmode and writemode arguments indicate how
-        authentication works.  They can be the following
-        values:
+        The readmode and writemode arguments indicate how permissions
+        work.  They can be the following values:
 
         ANY - means anyone can do the operation, even if not logged in
 
@@ -203,6 +209,24 @@ class DistributedState():
         if resp[:8] == '!!!!!you': raise PermissionError
         if resp[:5] == '!!!!!': raise UnexpectedError
         
+    def unauthorize(self, email):
+        '''Unauthorize a user
+        
+        You must be logged in as administrator and have joined the
+        application.  Note that in some read and write modes,
+        authorizing users has no effect.
+
+        Raises UnjoinedError if you haven't joined an application
+        state.  Raises DuplicateError if the email is not authorized.
+        Raises PermissionError if you are not logged in as admin.
+        
+        '''
+        if not self.joined: raise UnjoinedError
+        resp = self.serv.send('unauthorize', self.appkey, email)
+        if resp[:8] == '!!!!!not': raise DuplicateError
+        if resp[:8] == '!!!!!you': raise PermissionError
+        if resp[:5] == '!!!!!': raise UnexpectedError
+        
     def ban(self, email):
         '''Ban a user
         
@@ -212,13 +236,31 @@ class DistributedState():
 
         Raises UnjoinedError if you haven't joined an application
         state.  Raises DuplicateError if the email has already been
-        authorized.  Raises PermissionError if you are not logged in
-        as admin.
+        banned.  Raises PermissionError if you are not logged in as
+        admin.
         
         '''
         if not self.joined: raise UnjoinedError
         resp = self.serv.send('ban', self.appkey, email)
         if resp[:12] == '!!!!!already': raise DuplicateError
+        if resp[:8] == '!!!!!you': raise PermissionError
+        if resp[:5] == '!!!!!': raise UnexpectedError
+
+    def unban(self, email):
+        '''Unban a user
+        
+        You must be logged in as administrator and have joined the
+        application.  Note that in some read and write modes,
+        banning users has no effect.
+
+        Raises UnjoinedError if you haven't joined an application
+        state.  Raises DuplicateError if the email is not banned.
+        Raises PermissionError if you are not logged in as admin.
+        
+        '''
+        if not self.joined: raise UnjoinedError
+        resp = self.serv.send('unban', self.appkey, email)
+        if resp[:8] == '!!!!!not': raise DuplicateError
         if resp[:8] == '!!!!!you': raise PermissionError
         if resp[:5] == '!!!!!': raise UnexpectedError
 
@@ -239,13 +281,35 @@ class DistributedState():
         if not self.joined: raise UnjoinedError
         resp = self.serv.send('get', self.appkey, key)
         if resp[:7] == '!!!!!no': raise PermissionError
+        if resp[:8] == '!!!!!key': raise KeyError
         if resp[:5] == '!!!!!': raise UnexpectedError
         return unserialize(resp)
         
 
-    def keys(self):
-        '''Get list of all keys in the state'''
-        raise NotImplemented
+    def get_if_changed(self, key, oldhash):
+        '''Retrieve the value for the given key if it has changed
+
+        You pass a key and the hash value that you already know about,
+        and the server will either send you the most current value
+        that has a different hash, or raise DataUnchangedError if
+        there are no changes to report.
+
+        Will raise KeyError if there have not been any calls setting
+        the value of the key.  Will raise PermissionError if you do
+        not have permission to read the key value.  May raise other
+        various exceptions if the connection times out, if the server
+        reports a problem, or if the application data gets corrupted.
+        
+        The return value will be Python data.
+
+        '''
+        if not self.joined: raise UnjoinedError
+        resp = self.serv.send('getifchanged', self.appkey, key, oldhash)
+        if resp[:7] == '!!!!!no': raise PermissionError
+        if resp[:8] == '!!!!!key': raise KeyError
+        if resp[:9] == '!!!!!hash': raise DataUnchangedError
+        if resp[:5] == '!!!!!': raise UnexpectedError
+        return unserialize(resp)
 
     def __setitem__(self, key, value):
         '''Set the value for a given key
@@ -275,13 +339,17 @@ class DistributedState():
 
     def __delitem__(self, key):
         '''Delete the value for a given key
-        
-        May raise various exceptions if the connection times out, if
-        the server reports a problem, or if the application state data
-        gets corrupted.
 
+        Will raise PermissionError if you do not have permission to
+        write to the state.  Will raise KeyError if the key has no
+        value to delete.
+        
         '''
-        raise NotImplemented
+        if not self.joined: raise UnjoinedError
+        resp = self.serv.send('del', self.appkey, key)
+        if resp[:7] == '!!!!!no': raise PermissionError
+        if resp[:8] == '!!!!!key': raise KeyError
+        if resp[:5] == '!!!!!': raise UnexpectedError
 
     # Synchronized access functions
 
@@ -298,7 +366,13 @@ class DistributedState():
         To calculate the hash of a value v, use: hash_value(v)
 
         '''
-        raise NotImplemented
+        if not self.joined: raise UnjoinedError
+        resp = self.serv.send('update', self.appkey, key, oldhash, serialize(value))
+        if resp[:12] == '!!!!!no perm': raise PermissionError
+        if resp[:8] == '!!!!!too': raise SizeError
+        if resp[:11] == '!!!!!no val': raise KeyError
+        if resp[:9] == '!!!!!hash': raise UpdateFailedError
+        if resp[:5] == '!!!!!': raise UnexpectedError
 
     def apply_op(self, key, func, create=False, defaultvalue=None):
         '''Apply a function to the value stored at a key
@@ -350,89 +424,41 @@ SERVER = 'pygameserver.appspot.com'
 
 if __name__ == '__main__':
     shlf = DistributedState()
+    print shlf.version()
+
     shlf.login('nwhitehe@gmail.com', 'aribc45')
-    shlf.new_app('NathanWhitehead+testapp+2', 0, 0)
+    shlf.new_app('NathanWhitehead+testapp+2', ANY, ANY)
 #    shlf.join('NathanWhitehead+testapp+1')
     shlf['blah'] = 'foobar'
     print shlf['blah']
     shlf['testing'] = [1,2,3,'hello\nto you']
     print shlf['testing']
+    try:
+        x = shlf.get_if_changed('testing', hash_value([1,2,3,'hello\nto you']))
+        print 'ERROR ', x
+    except DataUnchangedError:
+        print 'Data unchanged, as it should be'
     shlf[1] = 3
     print shlf[1]
     shlf[1] += 2
     print shlf[1]
     shlf['message'] = 'secret'
-    shlf.delete_app()
-    sys.exit()
+    print shlf['message']
+    shlf.update('message', hash_value('secret'), 'public')
 
-#    shlf.update('message', hash_value('secret'), 'public')
     print shlf['message']
     try:
         shlf.update('message', hash_value('secret'), 'public2')
-    except:
+    except UpdateFailedError:
         print "update failed, as it should"
     print shlf['message']
+
     del shlf['message']
+
     try:
         print shlf['message']
-    except:
-        print "message does not exist, as it should"
-    shlf['thisisakey'] = None
-    keys = shlf.keys()
-    print keys
-    print shlf[keys[2]]
+    except KeyError:
+        print 'get failed, as it should'
 
-
-
-
-#SERVER = 'localhost:8080'
-SERVER = 'pygameserver.appspot.com'
-
-serv = PRPC(SERVER)
-
-resp = serv.send('version')
-print resp
-
-serv.login('nwhitehe@gmail.com', 'aribc454')
-resp = serv.send('registerapp', 'NathanWhitehead+Asteroids', 0, 3)
-print resp
-
-resp = serv.send('getapp', 'NathanWhitehead+Asteroids')
-print resp
-appkey = resp
-
-#resp = serv.send('authorize', appkey, 'nwhitehe@gmail.com')
-#print resp
-
-resp = serv.send('ban', appkey, 'malicious@gmail.com')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('ban', appkey, 'nwhitehe@gmail.com')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('set', appkey, 'blah', 'foobar')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('memcache')
-print resp
-
-resp = serv.send('deleteapp', appkey)
-print resp
-
-sys.exit()
-
+    shlf.delete_app()
+    sys.exit()
