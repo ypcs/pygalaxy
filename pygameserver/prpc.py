@@ -9,6 +9,7 @@ import sys
 import os
 import marshal
 
+
 ### Extracted and hacked up from appcfg.py of Google App Engine SDK
 
 def GetUserAgent():
@@ -224,59 +225,5 @@ class PRPC():
         if arg2 is not None: args['arg2'] = arg2
         if arg3 is not None: args['arg3'] = arg3
         return self.server.Send(self.command, 
-                                content_type='application/x-www-form-urlencoded',
+                                content_type='application/x-www-form-urlencoded; charset=utf-8',
                                 payload = urllib.urlencode(args))
-
-
-# Test
-
-#SERVER = 'localhost:8080'
-SERVER = 'pygameserver.appspot.com'
-
-serv = PRPC(SERVER)
-
-resp = serv.send('version')
-print resp
-
-serv.login('nwhitehe@gmail.com', 'aribc45')
-resp = serv.send('registerapp', 'NathanWhitehead+Asteroids', 0, 3)
-print resp
-
-resp = serv.send('getapp', 'NathanWhitehead+Asteroids')
-print resp
-appkey = resp
-
-#resp = serv.send('authorize', appkey, 'nwhitehe@gmail.com')
-#print resp
-
-resp = serv.send('ban', appkey, 'malicious@gmail.com')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('ban', appkey, 'nwhitehe@gmail.com')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('set', appkey, 'blah', 'foobar')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('get', appkey, 'blah')
-print resp
-
-resp = serv.send('memcache')
-print resp
-
-resp = serv.send('deleteapp', appkey)
-print resp
-
-sys.exit()

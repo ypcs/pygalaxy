@@ -1,5 +1,4 @@
 import md5
-import pickle
 import logging
 
 from google.appengine.api import users
@@ -28,7 +27,7 @@ class Application(db.Model):
 class AppDataInstance(db.Model):
     appref = db.ReferenceProperty(Application)
     shelfkey = db.StringProperty(multiline=False)
-    shelfdata = db.TextProperty()
+    shelfdata = db.BlobProperty()
     datalen = db.IntegerProperty()
     who = db.UserProperty()
 
