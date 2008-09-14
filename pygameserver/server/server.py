@@ -12,6 +12,8 @@ VERSION = 'Version 0.4'
 # How big can one entry in application table be?
 SINGLE_SIZE_LIMIT = 32000
 
+def hash(x): return md5.new(x).hexdigest()
+
 class Application(db.Model):
     '''Information about a client application'''
     appid = db.StringProperty(multiline=False)
@@ -80,16 +82,13 @@ def can_write(appl, who):
 
 # Process requests
 
-def Process(cmd, arg1, arg2, arg3):
-    '''Process PythonRemoteProcedureCall request
-
-    input: Python data coming in
-    Returns Python data going out.
-
-    '''
+def Process(cmd, arg1, arg2, arg3, arg4):
+    '''Process PythonRemoteProcedureCall request'''
     user = users.get_current_user()
+
     if cmd == 'version':
         return VERSION
+
     if cmd == 'registerapp':
         appid = arg1
         # Make sure logged in
@@ -106,6 +105,7 @@ def Process(cmd, arg1, arg2, arg3):
         app.writemode = int(arg3)
         app.put()
         return 'OK'
+
     if cmd == 'deleteapp':
         appkey = arg1
         # Make sure logged in
@@ -118,6 +118,7 @@ def Process(cmd, arg1, arg2, arg3):
             return '!!!!!you must be admin'
         appl.delete()
         return 'OK'
+
     if cmd == 'getapp':
         appid = arg1
         # Retrieve key of application
@@ -125,6 +126,7 @@ def Process(cmd, arg1, arg2, arg3):
         if app is None:
             return '!!!!!appid not found'
         return str(app.key())
+
     if cmd == 'authorize':
         appkey = arg1
         appl = lookup_app(appkey)
@@ -146,6 +148,28 @@ def Process(cmd, arg1, arg2, arg3):
         memcache.delete('R' + str(appl.key()) + ':' + str(auser))
         memcache.delete('W' + str(appl.key()) + ':' + str(auser))
         return 'OK'
+
+    if cmd == 'unauthorize':
+        appkey = arg1
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if user != appl.admin:
+            return '!!!!!you must be admin'
+        auser = users.User(arg2)
+        if auser is None:
+            # Currently this doesn't happen, invalid emails
+            # create ghost User objects
+            return '!!!!!user email not found'
+        prevauth = AuthorizedUser.all().filter('appref =', appl).filter('who =', auser).get()
+        if prevauth is None:
+            return '!!!!!not already authorized'
+        prevauth.delete()
+        # Clear permissions cache
+        memcache.delete('R' + str(appl.key()) + ':' + str(auser))
+        memcache.delete('W' + str(appl.key()) + ':' + str(auser))
+        return 'OK'
+
     if cmd == 'ban':
         appkey = arg1
         appl = lookup_app(appkey)
@@ -167,6 +191,28 @@ def Process(cmd, arg1, arg2, arg3):
         memcache.delete('R' + str(appl.key()) + ':' + str(auser))
         memcache.delete('W' + str(appl.key()) + ':' + str(auser))
         return 'OK'
+
+    if cmd == 'unban':
+        appkey = arg1
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if user != appl.admin:
+            return '!!!!!you must be admin'
+        auser = users.User(arg2)
+        if auser is None:
+            # Currently this doesn't happen, invalid emails
+            # create ghost User objects
+            return '!!!!!user email not found'
+        prevban = BannedUser.all().filter('appref =', appl).filter('who =', auser).get()
+        if prevban is None:
+            return '!!!!!not banned'
+        prevban.delete()
+        # Clear permissions cache
+        memcache.delete('R' + str(appl.key()) + ':' + str(auser))
+        memcache.delete('W' + str(appl.key()) + ':' + str(auser))
+        return 'OK'
+
     if cmd == 'get':
         appkey = arg1
         shelfkey = arg2
@@ -181,11 +227,40 @@ def Process(cmd, arg1, arg2, arg3):
         if data is not None: return data
         # Not in cache, do a query
         appinst = AppDataInstance.all().filter('appref =', appl).filter('shelfkey =', shelfkey).get()
-        if appinst is None: data = ''
-        else: data = str(appinst.shelfdata)
+        if appinst is None:
+            return '!!!!!keyerror'
+        else: data = appinst.shelfdata
         if not memcache.add(memcachekey, data, 60 * 60):
             logging.error('error adding memcache in get()')
         return data
+
+    if cmd == 'getifchanged':
+        appkey = arg1
+        shelfkey = arg2
+        oldhash = arg3
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if not can_read(appl, user):
+            return '!!!!!no permission to read'
+        # First check the cache
+        memcachekey = 'K' + str(appl.key()) + ':' + shelfkey
+        data = memcache.get(memcachekey)
+        if data is not None:
+            if oldhash == hash(data):
+                return '!!!!!hash match'
+            return data
+        # Not in cache, do a query
+        appinst = AppDataInstance.all().filter('appref =', appl).filter('shelfkey =', shelfkey).get()
+        if appinst is None:
+            return '!!!!!keyerror'
+        else: data = appinst.shelfdata
+        if not memcache.add(memcachekey, data, 60 * 60):
+            logging.error('error adding memcache in get()')
+        if oldhash == hash(data):
+            return '!!!!!hash match'
+        return data
+
     if cmd == 'set':
         appkey = arg1
         shelfkey = arg2
@@ -209,9 +284,52 @@ def Process(cmd, arg1, arg2, arg3):
         memcachekey = 'K' + str(appl.key()) + ':' + shelfkey
         memcache.delete(memcachekey)
         return 'OK'
+
+    if cmd == 'del':
+        appkey = arg1
+        shelfkey = arg2
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if not can_write(appl, user):
+            return '!!!!!no permission to write'
+        appinst = AppDataInstance.all().filter('appref =', appl).filter('shelfkey =', shelfkey).get()
+        if appinst is None:
+            return '!!!!!keyerror'
+        appinst.delete()
+        memcachekey = 'K' + str(appl.key()) + ':' + shelfkey
+        memcache.delete(memcachekey)
+        return 'OK'
+
+    if cmd == 'update':
+        appkey = arg1
+        shelfkey = arg2
+        oldhash = arg3
+        shelfdata = arg4
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if not can_write(appl, user):
+            return '!!!!!no permission to write'
+        if len(shelfdata) > SINGLE_SIZE_LIMIT:
+            return '!!!!!too big'
+        appinst = AppDataInstance.all().filter('appref =', appl).filter('shelfkey =', shelfkey).get()
+        if appinst is None:
+            return '!!!!!no value'
+        if oldhash != hash(appinst.shelfdata):
+            return '!!!!!hash mismatch'
+        appinst.shelfdata = shelfdata
+        appinst.datalen = len(shelfdata)
+        appinst.who = user
+        appinst.put()
+        memcachekey = 'K' + str(appl.key()) + ':' + shelfkey
+        memcache.delete(memcachekey)
+        return 'OK'
+
     if cmd == 'memcache':
         stats =  memcache.get_stats()
         return '%d hits\n%d misses\n' % (stats['hits'], stats['misses'])
+
     return '!!!!!unknown command'
 
 class Prpc(webapp.RequestHandler):
@@ -224,8 +342,9 @@ class Prpc(webapp.RequestHandler):
         arg1 = self.request.get('arg1')
         arg2 = self.request.get('arg2')
         arg3 = self.request.get('arg3')
+        arg4 = self.request.get('arg4')
         #try:
-        resp = Process(cmd, arg1, arg2, arg3)
+        resp = Process(cmd, arg1, arg2, arg3, arg4)
         #except:
         #    self.response.out.write('!!!!!process')
         #    return

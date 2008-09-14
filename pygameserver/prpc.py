@@ -219,11 +219,12 @@ class PRPC():
         self.server = HttpRpcServer(hostname)
     def login(self, email, password):
         self.server._Authenticate(email, password)
-    def send(self, cmd, arg1=None, arg2=None, arg3=None):
+    def send(self, cmd, arg1=None, arg2=None, arg3=None, arg4=None):
         args = {'cmd':cmd}
         if arg1 is not None: args['arg1'] = arg1
         if arg2 is not None: args['arg2'] = arg2
         if arg3 is not None: args['arg3'] = arg3
+        if arg4 is not None: args['arg4'] = arg4
         return self.server.Send(self.command, 
                                 content_type='application/x-www-form-urlencoded; charset=utf-8',
                                 payload = urllib.urlencode(args))
