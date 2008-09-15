@@ -26,6 +26,8 @@ This module connects to a server on the Google App Engine to store and
 manage data.
 
 '''
+__author__ = 'Nathan Whitehead'
+__version__ = '$Revision'
 
 import sys
 import md5
