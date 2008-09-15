@@ -401,8 +401,20 @@ Only the admin can reverse an authorization or a ban.
 ==COMMAND LINE==
 
 As a convenience, admin operations are available through the command
-line.
+line.  This can be useful for scripting and testing.
 
+{{{
+Usage: python appstate.py command [args]
+
+Commands:
+    version
+    new_app   email password appid readmode writemode
+    delete_app   email password appid
+    authorize   youremail yourpassword appid subjemail
+    ban   youremail yourpassword appid subjemail
+    unauthorize   youremail yourpassword appid subjemail
+    unban   youremail yourpassword appid subjemail
+}}}
 
 ==SECURITY==
 
