@@ -406,12 +406,12 @@ def test():
     assert 1e-10<abs(loads(dumps(1.1,32))-1.1)<1e-6
     assert abs(loads(dumps(1.1,64))-1.1)<1e-12
 
-#try:
-#    import psyco
-#    psyco.bind(dumps)
-#    psyco.bind(loads)
-#except ImportError:
-#    pass
+try:
+    import psyco
+    psyco.bind(dumps)
+    psyco.bind(loads)
+except ImportError:
+    pass
 
 
 if __name__ == '__main__':

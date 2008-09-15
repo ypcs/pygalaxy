@@ -1,8 +1,9 @@
-=Distributed Application Shared State=
+=AppState=
 
-Nathan Whitehead
-Copyright 2008
-Released under the LGPL
+==Distributed Application Shared State==
+
+Copyright 2008, Nathan Whitehead
+Released under Apache-2.0 and MIT licenses (see LICENSE section)
 
 This module allows your Python programs to easily have a persistent
 global distributed shared state.  This state can be used to store
@@ -10,15 +11,34 @@ things like number of users, game high scores, message of the day from
 the author, etc.  The state has an interface like a dictionary with
 some additional synchronization functionality and some restrictions.
 This module connects to a server on the Google App Engine to store and
-manage data.
-
-==Download==
-
+manage data.  It uses a simple security model based on Google
+accounts.
 
 
-==Documentation==
+==DOWNLOAD==
 
-==Overview==
+A source distribution is available at PyPI:
+http://pypi.python.org/pypi/AppState
+
+
+==INSTALLATION==
+
+AppState is packaged as Python source using distutils. To install, run
+the following command as root:
+
+python setup.py install
+
+For more information and options about using distutils, read:
+http://docs.python.org/inst/inst.html
+
+
+==DOCUMENTATION==
+
+The documentation consists of this README and the pydoc function
+documentation.
+
+
+==OVERVIEW==
 
 The basic idea is that you have an application that runs on many
 different computers, maybe simultaneously.  You would like to share
@@ -58,7 +78,9 @@ server just waits for application instances to connect and query
 the state.  
 
 
-==Creating a new app==
+==HOW TO USE==
+
+===Creating a new app===
 
 You need a Google account to register an application and be an admin.
 If you do not have a Google account, sign up at:
@@ -106,7 +128,7 @@ You only need to create the application object one time, it will
 persist in the Google App Engine datastore until you delete it.
 
 
-==Joining a state==
+===Joining a state===
 
 Once the application id has been registered, people can start joining
 the shared application state.  To join, they do:
@@ -119,7 +141,7 @@ If the read and write modes require it, users might also need to
 login after joining.
 
 
-==Using the state==
+===Using the state===
 
 The simplest way to use the distributed state object is to treat it
 like a dictionary.  You can store values into the state using:
@@ -156,7 +178,7 @@ del state['key']
 }}}
 
 
-==EXAMPLE: Message of the Day==
+===EXAMPLE: Message of the Day===
 
 A very simple example is a 'message of the day' feature.  The
 application retrieves the state and displays it.  Only the admin who
@@ -200,7 +222,7 @@ state['message'] = 'If you liked MyGreatApp, you will love MyGreatestApp'
 }}}
 
 
-==Updating state==
+===Updating state===
 
 Just using direct dictionary operations is not a good idea for
 applications that will have more than one person updating values.
@@ -285,7 +307,8 @@ incr_count()
 print state['count']
 }}}
 
-==State operations==
+
+===State operations===
 
 To help automate the process of using update() you can use apply_op().
 This way you don't have to worry about catching exceptions and
@@ -315,7 +338,7 @@ print state['count']
 }}}
 
 
-==Optimized gets==
+===Optimized gets===
 
 To save time and network traffic, you can request values from the
 shared store and only get updated values when there is something new
@@ -336,7 +359,7 @@ print lst
 }}}
 
 
-==Authorizing and banning users==
+===Authorizing and banning users===
 
 For many applications it is useful to be able to ban troublesome users
 or limit changes to a small set of authorized users.  Only the admin
@@ -375,7 +398,7 @@ To reverse an authorization or a ban, use unauthorize() or unban().
 Only the admin can reverse an authorization or a ban.
 
 
-==Security==
+==SECURITY==
 
 This module provides some rudimentary security features but you should
 not use this module to create applications that require security
@@ -434,7 +457,7 @@ email address to unban themselves.  There is also no way to ban users
 by IP address.
 
 
-==Performance issues==
+==PERFORMANCE==
 
 Each access to the shared state requires communication with the Google
 App Engine server.  To minimize slowdowns, try to cache data values
@@ -452,4 +475,76 @@ instances and the server.  On the other hand, you want the data stored
 under each key to be as short as possible so that the messages that
 are exchanged are as small as possible.
 
-There is 
+Another consideration is that atomic updates using update() or
+apply_op() can only happen on one key at a time.  If you split up data
+into different keys, you can no longer guarantee the consistency of
+the data when there are multiple concurrent writers.  That is not
+necessarily a bad thing, just something to be aware of.
+
+On the flip side, if only one key is used then all accesses to the
+central server will be serialized.  If there are many simultaneous
+users attempting to modify the state, each user will experience many
+update() failures and each modification will take longer.
+
+My advice is to start with all the state stored in one key and only
+use update() or apply_op() to change the state.  This makes reasoning
+about what is happening simpler.  Once the state starts including
+auxiliary information that takes up too much space, start separating
+out the bulky data into separate keys, with references in the main
+state key.  Auxiliary features that are independent of the main state
+should also go into new keys (e.g. like adding a message board).
+
+
+==LICENSE==
+
+===AppState excluding rencode.py===
+
+Copyright 2008 Nathan Whitehead
+Copyright 2007 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you
+may not use this file except in compliance with the License.  You may
+obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied.  See the License for the specific language governing
+permissions and limitations under the License.
+
+===rencode.py===
+
+Modifications by Nathan Whitehead 2008 released to public domain.
+Modifications by Connelly Barnes 2006-2007 released to public domain.
+
+Licensed under the "MIT license":
+
+Copyright (C) 2001-2002 Bram Cohen
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+The Software is provided "AS IS", without warranty of any kind,
+express or implied, including but not limited to the warranties of
+merchantability, fitness for a particular purpose and
+noninfringement. In no event shall the authors or copyright holders be
+liable for any claim, damages or other liability, whether in an action
+of contract, tort or otherwise, arising from, out of or in connection
+with the Software or the use or other dealings in the Software."
+
+(The rencode module is licensed under the above license as well).
+
+
+==KNOWN BUGS==
+
+None so far.
