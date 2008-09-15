@@ -361,11 +361,11 @@ def Process(cmd, arg1, arg2, arg3, arg4):
         appl = lookup_app(appkey)
         if appl is None:
             return '!!!!!appkey not found'
-        if user != appl.admin:
-            return '!!!!!you must be admin'
+        if not user:
+            return '!!!!!you must be logged in'
         if not mail.is_email_valid(addr):
             return '!!!!!invalid address'
-        mail.send_mail(appl.admin.email(), addr, subj, body)
+        mail.send_mail(user.email(), addr, subj, body)
         return 'OK'
 
     return '!!!!!unknown command'

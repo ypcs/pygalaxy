@@ -398,6 +398,31 @@ To reverse an authorization or a ban, use unauthorize() or unban().
 Only the admin can reverse an authorization or a ban.
 
 
+===Sending email===
+
+Not all players will be online at the same time.  To let players that
+are involved with the game but not currently playing know that something
+has happened, this module can send emails.
+
+To prevent abuse, any application instance that wishes to send an
+email must be logged in to Google accounts.  The email sent will
+always include a correct sender with the logged in users email.
+
+To send an email message:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('your@email', 'password')
+state.join('YourName+GrueAttack')
+msg = '''
+I attacked you with a grue!
+Continue playing GrueAttacker to counterattack.'''
+state.email('buddys@email', 'Grue attack!', msg)
+}}}
+
+
 ==COMMAND LINE==
 
 As a convenience, admin operations are available through the command
