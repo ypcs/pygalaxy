@@ -1,6 +1,7 @@
 import appstate
 
-state = appstate.DistributedState('testing+counter')
+state = appstate.DistributedState()
+state.join('YourName+CounterTest')
 
 def incr_count():
     try:

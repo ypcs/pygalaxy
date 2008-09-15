@@ -1,6 +1,6 @@
 import appstate
 
-appstate.init('testing+motd')
-motd = appstate.get_state()
-print motd
-# now do rest of application
+state = appstate.DistributedState()
+state.join('YourName+MessageOfTheDayForMyGreatApp')
+print state['message']
+# Do the rest of MyGreatApp
