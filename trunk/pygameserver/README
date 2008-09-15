@@ -474,6 +474,18 @@ that when you ban an email address, the same user can change their
 email address to unban themselves.  There is also no way to ban users
 by IP address.
 
+===Abuse===
+
+Please do not use too much space for no good reason, there is a 500MB
+limit for all users of the server.  There is no hard-code size limit
+per application, just don't be wasteful or I will delete your
+application.  Please do not try to crash the server and make Google
+ban me from the App Engine.  That said, I have secret tools that are
+not being released that monitor access to the server and attempt to
+mitigate abuse.
+
+If you discover a security problem with this package or encounter
+problem behavior from attackers, please email me.
 
 ==PERFORMANCE==
 
