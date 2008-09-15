@@ -24,6 +24,7 @@ import md5
 import logging
 
 from google.appengine.api import users
+from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -351,6 +352,21 @@ def Process(cmd, arg1, arg2, arg3, arg4):
     if cmd == 'memcache':
         stats =  memcache.get_stats()
         return '%d hits\n%d misses\n' % (stats['hits'], stats['misses'])
+
+    if cmd == 'email':
+        appkey = arg1
+        addr = arg2
+        subj = arg3
+        body = arg4
+        appl = lookup_app(appkey)
+        if appl is None:
+            return '!!!!!appkey not found'
+        if user != appl.admin:
+            return '!!!!!you must be admin'
+        if not mail.is_email_valid(addr):
+            return '!!!!!invalid address'
+        mail.send_mail(appl.admin.email(), addr, subj, body)
+        return 'OK'
 
     return '!!!!!unknown command'
 

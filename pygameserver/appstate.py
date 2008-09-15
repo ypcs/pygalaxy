@@ -33,6 +33,7 @@ import md5
 import rencode
 import prpc
 
+class InvalidAddressError(Exception): pass
 class SizeError(Exception): pass
 class DataUnchangedError(Exception): pass
 class DuplicateError(Exception): pass
@@ -271,6 +272,23 @@ class DistributedState():
         resp = self.serv.send('unban', self.appkey, email)
         if resp[:8] == '!!!!!not': raise DuplicateError
         if resp[:8] == '!!!!!you': raise PermissionError
+        if resp[:5] == '!!!!!': raise UnexpectedError
+
+    def email(self, addr, subj, body):
+        '''Send email
+        
+        You must be logged in as administrator and have joined the
+        application.  Destination address must be a valid email
+        address.
+
+        Raises UnjoinedError if you have not joined the application.
+        Raises PermissionError if you are not admin.
+
+        '''
+        if not self.joined: raise UnjoinedError
+        resp = self.serv.send('email', self.appkey, addr, subj, body)
+        if resp[:8] == '!!!!!you': raise PermissionError
+        if resp[:12] == '!!!!!invalid': raise InvalidAddressError
         if resp[:5] == '!!!!!': raise UnexpectedError
 
     # Direct access to persistent global state of application
