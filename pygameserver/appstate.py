@@ -27,7 +27,7 @@ manage data.
 
 '''
 __author__ = 'Nathan Whitehead'
-__version__ = '$Revision: 1$'
+__version__ = '0.1'
 
 import sys
 import md5
