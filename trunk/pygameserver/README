@@ -398,6 +398,12 @@ To reverse an authorization or a ban, use unauthorize() or unban().
 Only the admin can reverse an authorization or a ban.
 
 
+==COMMAND LINE==
+
+As a convenience, admin operations are available through the command
+line.
+
+
 ==SECURITY==
 
 This module provides some rudimentary security features but you should

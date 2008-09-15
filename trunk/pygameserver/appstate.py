@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #
 # Copyright 2008 Nathan Whitehead
 #
@@ -431,42 +432,65 @@ SERVER = 'pygameserver.appspot.com'
 
 
 if __name__ == '__main__':
-    shlf = DistributedState()
-    print shlf.version()
+    if len(sys.argv) <= 1:
+        print '''
+Usage: python %s command [args]
 
-    shlf.login('nwhitehe@gmail.com', 'aribc45')
-    shlf.new_app('NathanWhitehead+testapp+2', ANY, ANY)
-#    shlf.join('NathanWhitehead+testapp+1')
-    shlf['blah'] = 'foobar'
-    print shlf['blah']
-    shlf['testing'] = [1,2,3,'hello\nto you']
-    print shlf['testing']
-    try:
-        x = shlf.get_if_changed('testing', hash_value([1,2,3,'hello\nto you']))
-        print 'ERROR ', x
-    except DataUnchangedError:
-        print 'Data unchanged, as it should be'
-    shlf[1] = 3
-    print shlf[1]
-    shlf[1] += 2
-    print shlf[1]
-    shlf['message'] = 'secret'
-    print shlf['message']
-    shlf.update('message', hash_value('secret'), 'public')
-
-    print shlf['message']
-    try:
-        shlf.update('message', hash_value('secret'), 'public2')
-    except UpdateFailedError:
-        print "update failed, as it should"
-    print shlf['message']
-
-    del shlf['message']
-
-    try:
-        print shlf['message']
-    except KeyError:
-        print 'get failed, as it should'
-
-    shlf.delete_app()
-    sys.exit()
+Commands:
+    version
+    new_app email password appid readmode writemode
+    delete_app email password appid
+    authorize youremail yourpassword appid subjemail
+    ban youremail yourpassword appid subjemail
+    unauthorize youremail yourpassword appid subjemail
+    unban youremail yourpassword appid subjemail
+''' % sys.argv[0]
+        sys.exit()
+    cmd = sys.argv[1]
+    ds = DistributedState()
+    if cmd == 'version':
+        print ds.version()
+        sys.exit()
+    if cmd == 'new_app':
+        ds.login(sys.argv[2], sys.argv[3])
+        modes = {'ANY' : ANY,
+                 'ADMIN_ONLY' : ADMIN_ONLY,
+                 'AUTHORIZED_ONLY' : AUTHORIZED_ONLY,
+                 'UNBANNED_ONLY' : UNBANNED_ONLY,
+                 str(ANY) : ANY,
+                 str(ADMIN_ONLY) : ADMIN_ONLY,
+                 str(AUTHORIZED_ONLY) : AUTHORIZED_ONLY,
+                 str(UNBANNED_ONLY) : UNBANNED_ONLY,
+                 }
+        appid = sys.argv[4]
+        readmode = modes[sys.argv[5]]
+        writemode = modes[sys.argv[6]]
+        ds.new_app(appid, readmode, writemode)
+        sys.exit()
+    if cmd == 'delete_app':
+        ds.login(sys.argv[2], sys.argv[3])
+        appid = sys.argv[4]
+        ds.join(appid)
+        ds.delete_app()
+        sys.exit()
+    if cmd == 'ban':
+        ds.login(sys.argv[2], sys.argv[3])
+        ds.join(sys.argv[4])
+        ds.ban(sys.argv[5])
+        sys.exit()
+    if cmd == 'unban':
+        ds.login(sys.argv[2], sys.argv[3])
+        ds.join(sys.argv[4])
+        ds.unban(sys.argv[5])
+        sys.exit()
+    if cmd == 'authorize':
+        ds.login(sys.argv[2], sys.argv[3])
+        ds.join(sys.argv[4])
+        ds.authorize(sys.argv[5])
+        sys.exit()
+    if cmd == 'unauthorize':
+        ds.login(sys.argv[2], sys.argv[3])
+        ds.join(sys.argv[4])
+        ds.unauthorize(sys.argv[5])
+        sys.exit()
+    print 'Unknown command %s\n' % cmd
