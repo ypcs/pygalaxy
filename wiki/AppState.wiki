@@ -34,8 +34,9 @@ http://docs.python.org/inst/inst.html
 
 ==DOCUMENTATION==
 
-The documentation consists of this README and the pydoc function
-documentation.
+The documentation consists of this README and the
+[http://www.paranoidbrain.com/appstate.html pydoc function
+documentation].
 
 
 ==OVERVIEW==
