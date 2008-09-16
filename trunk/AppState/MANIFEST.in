@@ -1,0 +1,3 @@
+include doc/*
+include LICENSE-2.0.txt
+include server/*
