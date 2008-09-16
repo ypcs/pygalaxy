@@ -1,18 +1,29 @@
 =AppState=
 
-==Distributed Application Shared State==
+==Application Shared State==
 
 Copyright 2008, Nathan Whitehead
 Released under Apache-2.0 and MIT licenses (see LICENSE section)
 
 This module allows your Python programs to easily have a persistent
-global distributed shared state.  This state can be used to store
-things like number of users, game high scores, message of the day from
-the author, etc.  The state has an interface like a dictionary with
-some additional synchronization functionality and some restrictions.
-This module connects to a server on the Google App Engine to store and
+global shared state.  This state can be used to store things like
+number of users, game high scores, message of the day from the author,
+etc.  The state has an interface like a dictionary with some
+additional synchronization functionality and some restrictions.  This
+module connects to a server on the Google App Engine to store and
 manage data.  It uses a simple security model based on Google
 accounts.
+
+Why would you want to use this module?
+
+  * Quickly add multiplayer features to your Pygame game
+
+  * Take advantage of Google's efficient and reliable infrastructure
+    (for free!)
+
+  * Super easy to get started and use
+
+  * Includes security features
 
 
 ==DOWNLOAD==
@@ -76,7 +87,7 @@ The distributed state also does not currently have a push capability,
 that is, there is no way for the server to send a message to an 
 application instance telling it that something has happened.  The
 server just waits for application instances to connect and query
-the state.  
+the state.
 
 
 ==HOW TO USE==
@@ -553,6 +564,11 @@ should also go into new keys (e.g. like adding a message board).
 
 ==LICENSE==
 
+This module is released under the Apache-2.0 license, the same license
+that Google uses for their Google App Engine SDK.  One file,
+rencode.py, is distributed under the MIT license.  Both licenses are
+compatible with the LGPL used by Pygame.
+
 ===AppState excluding rencode.py===
 
 Copyright 2008 Nathan Whitehead
@@ -604,3 +620,17 @@ with the Software or the use or other dealings in the Software."
 ==KNOWN BUGS==
 
 None so far.
+
+
+==THE FUTURE==
+
+The server does not currently have any way of notifying clients that a
+client has updated something.  I'm working on nice ways to do this
+that don't bog down the server too much and are convenient for python
+programmers.
+
+Another thing I'm thinking about is a little library that does about
+the same thing as AppState but is designed in a self-contained way.
+Instead of using Google App Engine as the server, the first person to
+start the game would be the server.  This might be fast enough for
+realtime multiplayer (but there are a lot of issues to work out).
