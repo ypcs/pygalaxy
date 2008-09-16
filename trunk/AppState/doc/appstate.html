@@ -1,0 +1,885 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module appstate</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>appstate</strong></big></big> (version 0.1)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/lib/python2.5/site-packages/appstate.py">/usr/lib/python2.5/site-packages/appstate.py</a></font></td></tr></table>
+    <p><tt>Distributed&nbsp;Application&nbsp;Shared&nbsp;State<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;allows&nbsp;your&nbsp;Python&nbsp;programs&nbsp;to&nbsp;easily&nbsp;have&nbsp;a&nbsp;persistent<br>
+global&nbsp;distributed&nbsp;shared&nbsp;state.&nbsp;&nbsp;This&nbsp;state&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;store<br>
+things&nbsp;like&nbsp;number&nbsp;of&nbsp;users,&nbsp;game&nbsp;high&nbsp;scores,&nbsp;message&nbsp;of&nbsp;the&nbsp;day&nbsp;from<br>
+the&nbsp;author,&nbsp;etc.&nbsp;&nbsp;The&nbsp;state&nbsp;has&nbsp;an&nbsp;interface&nbsp;like&nbsp;a&nbsp;dictionary&nbsp;with<br>
+some&nbsp;additional&nbsp;synchronization&nbsp;functionality&nbsp;and&nbsp;some&nbsp;restrictions.<br>
+This&nbsp;module&nbsp;connects&nbsp;to&nbsp;a&nbsp;server&nbsp;on&nbsp;the&nbsp;Google&nbsp;App&nbsp;Engine&nbsp;to&nbsp;store&nbsp;and<br>
+manage&nbsp;data.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="md5.html">md5</a><br>
+</td><td width="25%" valign=top><a href="prpc.html">prpc</a><br>
+</td><td width="25%" valign=top><a href="rencode.html">rencode</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="appstate.html#DistributedState">DistributedState</a>
+</font></dt><dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="appstate.html#AppIdError">AppIdError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#DataUnchangedError">DataUnchangedError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#DuplicateError">DuplicateError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#InvalidAddressError">InvalidAddressError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#LoginError">LoginError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#PermissionError">PermissionError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#SizeError">SizeError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#UnexpectedError">UnexpectedError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#UnjoinedError">UnjoinedError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="appstate.html#UpdateFailedError">UpdateFailedError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="AppIdError">class <strong>AppIdError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#AppIdError">AppIdError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="AppIdError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#AppIdError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="AppIdError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="AppIdError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="AppIdError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="AppIdError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="AppIdError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="AppIdError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="AppIdError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="AppIdError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="AppIdError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#AppIdError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DataUnchangedError">class <strong>DataUnchangedError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#DataUnchangedError">DataUnchangedError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="DataUnchangedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#DataUnchangedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="DataUnchangedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DataUnchangedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DataUnchangedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DataUnchangedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="DataUnchangedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DataUnchangedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DataUnchangedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="DataUnchangedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DataUnchangedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#DataUnchangedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DistributedState">class <strong>DistributedState</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Distributed&nbsp;Persistent&nbsp;Data&nbsp;Store<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DistributedState-__delitem__"><strong>__delitem__</strong></a>(self, key)</dt><dd><tt>Delete&nbsp;the&nbsp;value&nbsp;for&nbsp;a&nbsp;given&nbsp;key<br>
+&nbsp;<br>
+Will&nbsp;raise&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;do&nbsp;not&nbsp;have&nbsp;permission&nbsp;to<br>
+write&nbsp;to&nbsp;the&nbsp;state.&nbsp;&nbsp;Will&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;the&nbsp;key&nbsp;has&nbsp;no<br>
+value&nbsp;to&nbsp;delete.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt><dd><tt>Retrieve&nbsp;the&nbsp;most&nbsp;current&nbsp;value&nbsp;for&nbsp;the&nbsp;given&nbsp;key<br>
+&nbsp;<br>
+Will&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;there&nbsp;have&nbsp;not&nbsp;been&nbsp;any&nbsp;calls&nbsp;setting<br>
+the&nbsp;value&nbsp;of&nbsp;the&nbsp;key.&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;do<br>
+not&nbsp;have&nbsp;permission&nbsp;to&nbsp;read&nbsp;the&nbsp;key&nbsp;value.&nbsp;&nbsp;May&nbsp;raise&nbsp;other<br>
+various&nbsp;exceptions&nbsp;if&nbsp;the&nbsp;connection&nbsp;times&nbsp;out,&nbsp;if&nbsp;the&nbsp;server<br>
+reports&nbsp;a&nbsp;problem,&nbsp;or&nbsp;if&nbsp;the&nbsp;application&nbsp;data&nbsp;gets&nbsp;corrupted.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;will&nbsp;be&nbsp;Python&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-__init__"><strong>__init__</strong></a>(self, server<font color="#909090">='pygameserver.appspot.com'</font>)</dt><dd><tt>Create&nbsp;new&nbsp;connection&nbsp;to&nbsp;server<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;establishes&nbsp;a&nbsp;connection&nbsp;to&nbsp;Google&nbsp;App&nbsp;Engine.<br>
+Server&nbsp;will&nbsp;normally&nbsp;be&nbsp;pygameserver.appspot.com</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-__setitem__"><strong>__setitem__</strong></a>(self, key, value)</dt><dd><tt>Set&nbsp;the&nbsp;value&nbsp;for&nbsp;a&nbsp;given&nbsp;key<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;accepts&nbsp;any&nbsp;Python&nbsp;data&nbsp;for&nbsp;the&nbsp;value&nbsp;that&nbsp;is&nbsp;not<br>
+too&nbsp;big.&nbsp;&nbsp;The&nbsp;size&nbsp;of&nbsp;the&nbsp;data&nbsp;when&nbsp;serialized&nbsp;and&nbsp;encoded&nbsp;is<br>
+limited&nbsp;to&nbsp;20K.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;this&nbsp;function&nbsp;does&nbsp;not&nbsp;care&nbsp;what&nbsp;the&nbsp;previous&nbsp;state<br>
+of&nbsp;the&nbsp;application&nbsp;was.&nbsp;&nbsp;Other&nbsp;copies&nbsp;of&nbsp;the&nbsp;application&nbsp;may<br>
+have&nbsp;already&nbsp;updated&nbsp;the&nbsp;value&nbsp;by&nbsp;the&nbsp;time&nbsp;you&nbsp;call&nbsp;set().&nbsp;&nbsp;It<br>
+is&nbsp;recommended&nbsp;to&nbsp;use&nbsp;<a href="#DistributedState-update">update</a>()&nbsp;rather&nbsp;than&nbsp;this&nbsp;function.<br>
+&nbsp;<br>
+Will&nbsp;raise&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;have&nbsp;not&nbsp;joined&nbsp;the<br>
+application.&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;do&nbsp;not&nbsp;have<br>
+permission&nbsp;to&nbsp;write&nbsp;to&nbsp;the&nbsp;state.&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#SizeError">SizeError</a>&nbsp;if&nbsp;the<br>
+value&nbsp;is&nbsp;too&nbsp;big.&nbsp;&nbsp;May&nbsp;raise&nbsp;various&nbsp;exceptions&nbsp;if&nbsp;the<br>
+connection&nbsp;times&nbsp;out,&nbsp;if&nbsp;the&nbsp;server&nbsp;reports&nbsp;a&nbsp;problem,&nbsp;or&nbsp;if<br>
+the&nbsp;application&nbsp;state&nbsp;data&nbsp;gets&nbsp;corrupted.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-apply_op"><strong>apply_op</strong></a>(self, key, func, create<font color="#909090">=False</font>, defaultvalue<font color="#909090">=None</font>)</dt><dd><tt>Apply&nbsp;a&nbsp;function&nbsp;to&nbsp;the&nbsp;value&nbsp;stored&nbsp;at&nbsp;a&nbsp;key<br>
+&nbsp;<br>
+The&nbsp;function&nbsp;func&nbsp;must&nbsp;take&nbsp;one&nbsp;argument&nbsp;and&nbsp;return&nbsp;one<br>
+argument.&nbsp;&nbsp;The&nbsp;state&nbsp;will&nbsp;be&nbsp;updated&nbsp;to&nbsp;reflect&nbsp;applying&nbsp;the<br>
+function&nbsp;to&nbsp;the&nbsp;value&nbsp;stored&nbsp;at&nbsp;the&nbsp;given&nbsp;key.&nbsp;&nbsp;The&nbsp;function<br>
+may&nbsp;be&nbsp;called&nbsp;more&nbsp;than&nbsp;once&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;being&nbsp;changed<br>
+by&nbsp;other&nbsp;instances&nbsp;of&nbsp;the&nbsp;application.&nbsp;&nbsp;To&nbsp;make&nbsp;debugging<br>
+easier,&nbsp;try&nbsp;to&nbsp;limit&nbsp;side&nbsp;effects&nbsp;in&nbsp;the&nbsp;function.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;key&nbsp;has&nbsp;no&nbsp;value,&nbsp;and&nbsp;create&nbsp;is&nbsp;false,&nbsp;will&nbsp;raise<br>
+a&nbsp;KeyError&nbsp;exception.&nbsp;&nbsp;If&nbsp;create&nbsp;is&nbsp;true,&nbsp;the&nbsp;function<br>
+will&nbsp;apply&nbsp;to&nbsp;the&nbsp;given&nbsp;defaultvalue.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;attempts&nbsp;to&nbsp;guarantee&nbsp;that&nbsp;even&nbsp;if&nbsp;many<br>
+instances&nbsp;are&nbsp;simultaneously&nbsp;attempting&nbsp;to&nbsp;update&nbsp;the&nbsp;same<br>
+value&nbsp;in&nbsp;the&nbsp;state,&nbsp;all&nbsp;the&nbsp;functions&nbsp;will&nbsp;be&nbsp;applied&nbsp;in&nbsp;some<br>
+order.&nbsp;&nbsp;For&nbsp;example,&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;a&nbsp;list&nbsp;and&nbsp;the&nbsp;operation<br>
+is&nbsp;inserting&nbsp;an&nbsp;element&nbsp;into&nbsp;the&nbsp;list,&nbsp;using&nbsp;this&nbsp;method&nbsp;will<br>
+guarantee&nbsp;that&nbsp;all&nbsp;elements&nbsp;will&nbsp;be&nbsp;inserted.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;cannot&nbsp;guarantee&nbsp;that&nbsp;two&nbsp;instances&nbsp;will&nbsp;not<br>
+simultaneously&nbsp;create&nbsp;a&nbsp;new&nbsp;value.&nbsp;&nbsp;If&nbsp;you&nbsp;need&nbsp;absolute<br>
+consistency&nbsp;in&nbsp;this&nbsp;case,&nbsp;create&nbsp;default&nbsp;values&nbsp;in&nbsp;the&nbsp;state<br>
+before&nbsp;distributing&nbsp;multiple&nbsp;instances&nbsp;of&nbsp;the&nbsp;application.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-authorize"><strong>authorize</strong></a>(self, email)</dt><dd><tt>Authorize&nbsp;a&nbsp;user<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in&nbsp;as&nbsp;administrator&nbsp;and&nbsp;have&nbsp;joined&nbsp;the<br>
+application.&nbsp;&nbsp;Note&nbsp;that&nbsp;in&nbsp;some&nbsp;read&nbsp;and&nbsp;write&nbsp;modes,<br>
+authorizing&nbsp;users&nbsp;has&nbsp;no&nbsp;effect.<br>
+&nbsp;<br>
+Raises&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;haven't&nbsp;joined&nbsp;an&nbsp;application<br>
+state.&nbsp;&nbsp;Raises&nbsp;<a href="#DuplicateError">DuplicateError</a>&nbsp;if&nbsp;the&nbsp;email&nbsp;has&nbsp;already&nbsp;been<br>
+authorized.&nbsp;&nbsp;Raises&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;logged&nbsp;in<br>
+as&nbsp;admin.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-ban"><strong>ban</strong></a>(self, email)</dt><dd><tt>Ban&nbsp;a&nbsp;user<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in&nbsp;as&nbsp;administrator&nbsp;and&nbsp;have&nbsp;joined&nbsp;the<br>
+application.&nbsp;&nbsp;Note&nbsp;that&nbsp;in&nbsp;some&nbsp;read&nbsp;and&nbsp;write&nbsp;modes,<br>
+banning&nbsp;users&nbsp;has&nbsp;no&nbsp;effect.<br>
+&nbsp;<br>
+Raises&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;haven't&nbsp;joined&nbsp;an&nbsp;application<br>
+state.&nbsp;&nbsp;Raises&nbsp;<a href="#DuplicateError">DuplicateError</a>&nbsp;if&nbsp;the&nbsp;email&nbsp;has&nbsp;already&nbsp;been<br>
+banned.&nbsp;&nbsp;Raises&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;logged&nbsp;in&nbsp;as<br>
+admin.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-delete_app"><strong>delete_app</strong></a>(self)</dt><dd><tt>Delete&nbsp;the&nbsp;application<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in&nbsp;and&nbsp;have&nbsp;joined&nbsp;the&nbsp;application.&nbsp;&nbsp;Your<br>
+account&nbsp;muse&nbsp;be&nbsp;the&nbsp;admin&nbsp;account&nbsp;for&nbsp;the&nbsp;application.&nbsp;&nbsp;Cannot<br>
+be&nbsp;undone.<br>
+&nbsp;<br>
+Will&nbsp;raise&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;logged&nbsp;in&nbsp;and&nbsp;the<br>
+application&nbsp;admin.&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;have&nbsp;not<br>
+joined&nbsp;the&nbsp;application.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-email"><strong>email</strong></a>(self, addr, subj, body)</dt><dd><tt>Send&nbsp;email<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in&nbsp;as&nbsp;administrator&nbsp;and&nbsp;have&nbsp;joined&nbsp;the<br>
+application.&nbsp;&nbsp;Destination&nbsp;address&nbsp;must&nbsp;be&nbsp;a&nbsp;valid&nbsp;email<br>
+address.<br>
+&nbsp;<br>
+Raises&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;have&nbsp;not&nbsp;joined&nbsp;the&nbsp;application.<br>
+Raises&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;admin.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-get_if_changed"><strong>get_if_changed</strong></a>(self, key, oldhash)</dt><dd><tt>Retrieve&nbsp;the&nbsp;value&nbsp;for&nbsp;the&nbsp;given&nbsp;key&nbsp;if&nbsp;it&nbsp;has&nbsp;changed<br>
+&nbsp;<br>
+You&nbsp;pass&nbsp;a&nbsp;key&nbsp;and&nbsp;the&nbsp;hash&nbsp;value&nbsp;that&nbsp;you&nbsp;already&nbsp;know&nbsp;about,<br>
+and&nbsp;the&nbsp;server&nbsp;will&nbsp;either&nbsp;send&nbsp;you&nbsp;the&nbsp;most&nbsp;current&nbsp;value<br>
+that&nbsp;has&nbsp;a&nbsp;different&nbsp;hash,&nbsp;or&nbsp;raise&nbsp;<a href="#DataUnchangedError">DataUnchangedError</a>&nbsp;if<br>
+there&nbsp;are&nbsp;no&nbsp;changes&nbsp;to&nbsp;report.<br>
+&nbsp;<br>
+Will&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;there&nbsp;have&nbsp;not&nbsp;been&nbsp;any&nbsp;calls&nbsp;setting<br>
+the&nbsp;value&nbsp;of&nbsp;the&nbsp;key.&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;do<br>
+not&nbsp;have&nbsp;permission&nbsp;to&nbsp;read&nbsp;the&nbsp;key&nbsp;value.&nbsp;&nbsp;May&nbsp;raise&nbsp;other<br>
+various&nbsp;exceptions&nbsp;if&nbsp;the&nbsp;connection&nbsp;times&nbsp;out,&nbsp;if&nbsp;the&nbsp;server<br>
+reports&nbsp;a&nbsp;problem,&nbsp;or&nbsp;if&nbsp;the&nbsp;application&nbsp;data&nbsp;gets&nbsp;corrupted.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;will&nbsp;be&nbsp;Python&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-join"><strong>join</strong></a>(self, appid<font color="#909090">=None</font>)</dt><dd><tt>Join&nbsp;an&nbsp;existing&nbsp;application<br>
+&nbsp;<br>
+Establishes&nbsp;connection&nbsp;to&nbsp;the&nbsp;pygame&nbsp;application&nbsp;distributed<br>
+state&nbsp;using&nbsp;application&nbsp;id&nbsp;(appid).&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#AppIdError">AppIdError</a>&nbsp;if<br>
+the&nbsp;appid&nbsp;does&nbsp;not&nbsp;exist.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-login"><strong>login</strong></a>(self, email, password)</dt><dd><tt>Login&nbsp;to&nbsp;Google&nbsp;account<br>
+&nbsp;<br>
+Calling&nbsp;this&nbsp;function&nbsp;logs&nbsp;into&nbsp;a&nbsp;Google&nbsp;account&nbsp;with&nbsp;the<br>
+given&nbsp;email&nbsp;and&nbsp;password.&nbsp;&nbsp;Will&nbsp;raise&nbsp;<a href="#LoginError">LoginError</a>&nbsp;if&nbsp;there&nbsp;is&nbsp;a<br>
+problem.&nbsp;&nbsp;Check&nbsp;the&nbsp;'reasons'&nbsp;field&nbsp;of&nbsp;the&nbsp;exception&nbsp;to&nbsp;see<br>
+why&nbsp;the&nbsp;login&nbsp;was&nbsp;denied&nbsp;if&nbsp;there&nbsp;was&nbsp;an&nbsp;exception&nbsp;raised.<br>
+&nbsp;<br>
+Your&nbsp;account&nbsp;must&nbsp;already&nbsp;exist&nbsp;and&nbsp;be&nbsp;in&nbsp;good&nbsp;standing.&nbsp;To<br>
+create&nbsp;new&nbsp;accounts&nbsp;or&nbsp;manage&nbsp;problems&nbsp;with&nbsp;your&nbsp;existing<br>
+account,&nbsp;go&nbsp;to:<br>
+&nbsp;<br>
+https://www.google.com/accounts/Login<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;have&nbsp;been&nbsp;locked&nbsp;out&nbsp;of&nbsp;your&nbsp;account&nbsp;for&nbsp;attempting&nbsp;to<br>
+login&nbsp;too&nbsp;quickly&nbsp;with&nbsp;incorrect&nbsp;passwords,&nbsp;unlock&nbsp;the&nbsp;account<br>
+by&nbsp;going&nbsp;to:<br>
+&nbsp;<br>
+https://www.google.com/accounts/DisplayUnlockCaptcha</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-new_app"><strong>new_app</strong></a>(self, appid, readmode<font color="#909090">=0</font>, writemode<font color="#909090">=0</font>)</dt><dd><tt>Register&nbsp;a&nbsp;new&nbsp;application<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in.&nbsp;&nbsp;Your&nbsp;account&nbsp;will&nbsp;be&nbsp;the&nbsp;admin<br>
+account&nbsp;for&nbsp;the&nbsp;application.&nbsp;&nbsp;After&nbsp;creating&nbsp;the&nbsp;app,<br>
+joins&nbsp;it.<br>
+&nbsp;<br>
+Each&nbsp;application&nbsp;must&nbsp;have&nbsp;a&nbsp;unique&nbsp;id.&nbsp;&nbsp;Your&nbsp;appid&nbsp;is&nbsp;shared<br>
+between&nbsp;all&nbsp;instances&nbsp;of&nbsp;your&nbsp;application&nbsp;that&nbsp;are&nbsp;running.<br>
+&nbsp;<br>
+Recommended&nbsp;naming&nbsp;scheme&nbsp;for&nbsp;appids:<br>
+(your&nbsp;name&nbsp;OR&nbsp;your&nbsp;domain&nbsp;name)&nbsp;PLUS&nbsp;application&nbsp;name<br>
+&nbsp;<br>
+So&nbsp;one&nbsp;of&nbsp;my&nbsp;hypothetical&nbsp;application&nbsp;ids&nbsp;is:<br>
+NathanWhitehead+AstroMaxBlaster<br>
+&nbsp;<br>
+The&nbsp;readmode&nbsp;and&nbsp;writemode&nbsp;arguments&nbsp;indicate&nbsp;how&nbsp;permissions<br>
+work.&nbsp;&nbsp;They&nbsp;can&nbsp;be&nbsp;the&nbsp;following&nbsp;values:<br>
+&nbsp;<br>
+ANY&nbsp;-&nbsp;means&nbsp;anyone&nbsp;can&nbsp;do&nbsp;the&nbsp;operation,&nbsp;even&nbsp;if&nbsp;not&nbsp;logged&nbsp;in<br>
+&nbsp;<br>
+ADMIN_ONLY&nbsp;-&nbsp;only&nbsp;the&nbsp;admin&nbsp;can&nbsp;do&nbsp;the&nbsp;operation<br>
+&nbsp;<br>
+AUTHORIZED_ONLY&nbsp;-&nbsp;only&nbsp;users&nbsp;that&nbsp;have&nbsp;been&nbsp;explicitly<br>
+authorized&nbsp;can&nbsp;do&nbsp;the&nbsp;operation<br>
+&nbsp;<br>
+UNBANNED_ONLY&nbsp;-&nbsp;any&nbsp;logged&nbsp;in&nbsp;user&nbsp;that&nbsp;has&nbsp;not&nbsp;been&nbsp;banned<br>
+can&nbsp;do&nbsp;the&nbsp;operation<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;setting&nbsp;readmode=ANY&nbsp;and&nbsp;writemode=ADMIN_ONLY<br>
+means&nbsp;that&nbsp;anyone&nbsp;can&nbsp;read&nbsp;the&nbsp;application&nbsp;state,&nbsp;but&nbsp;only&nbsp;the<br>
+admin&nbsp;can&nbsp;make&nbsp;any&nbsp;changes.&nbsp;&nbsp;You&nbsp;cannot&nbsp;change&nbsp;readmode&nbsp;or<br>
+writemode&nbsp;once&nbsp;the&nbsp;application&nbsp;has&nbsp;been&nbsp;registered.&nbsp;&nbsp;Only&nbsp;the<br>
+admin&nbsp;can&nbsp;authorize&nbsp;users&nbsp;or&nbsp;ban&nbsp;them.<br>
+&nbsp;<br>
+Will&nbsp;raise&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;logged&nbsp;in.&nbsp;&nbsp;Will&nbsp;raise<br>
+<a href="#DuplicateError">DuplicateError</a>&nbsp;if&nbsp;the&nbsp;application&nbsp;id&nbsp;is&nbsp;already&nbsp;used.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-unauthorize"><strong>unauthorize</strong></a>(self, email)</dt><dd><tt>Unauthorize&nbsp;a&nbsp;user<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in&nbsp;as&nbsp;administrator&nbsp;and&nbsp;have&nbsp;joined&nbsp;the<br>
+application.&nbsp;&nbsp;Note&nbsp;that&nbsp;in&nbsp;some&nbsp;read&nbsp;and&nbsp;write&nbsp;modes,<br>
+authorizing&nbsp;users&nbsp;has&nbsp;no&nbsp;effect.<br>
+&nbsp;<br>
+Raises&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;haven't&nbsp;joined&nbsp;an&nbsp;application<br>
+state.&nbsp;&nbsp;Raises&nbsp;<a href="#DuplicateError">DuplicateError</a>&nbsp;if&nbsp;the&nbsp;email&nbsp;is&nbsp;not&nbsp;authorized.<br>
+Raises&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;logged&nbsp;in&nbsp;as&nbsp;admin.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-unban"><strong>unban</strong></a>(self, email)</dt><dd><tt>Unban&nbsp;a&nbsp;user<br>
+&nbsp;<br>
+You&nbsp;must&nbsp;be&nbsp;logged&nbsp;in&nbsp;as&nbsp;administrator&nbsp;and&nbsp;have&nbsp;joined&nbsp;the<br>
+application.&nbsp;&nbsp;Note&nbsp;that&nbsp;in&nbsp;some&nbsp;read&nbsp;and&nbsp;write&nbsp;modes,<br>
+banning&nbsp;users&nbsp;has&nbsp;no&nbsp;effect.<br>
+&nbsp;<br>
+Raises&nbsp;<a href="#UnjoinedError">UnjoinedError</a>&nbsp;if&nbsp;you&nbsp;haven't&nbsp;joined&nbsp;an&nbsp;application<br>
+state.&nbsp;&nbsp;Raises&nbsp;<a href="#DuplicateError">DuplicateError</a>&nbsp;if&nbsp;the&nbsp;email&nbsp;is&nbsp;not&nbsp;banned.<br>
+Raises&nbsp;<a href="#PermissionError">PermissionError</a>&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;logged&nbsp;in&nbsp;as&nbsp;admin.</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-update"><strong>update</strong></a>(self, key, oldhash, value)</dt><dd><tt>Update&nbsp;the&nbsp;value&nbsp;associated&nbsp;with&nbsp;a&nbsp;given&nbsp;key<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;checks&nbsp;that&nbsp;the&nbsp;current&nbsp;value&nbsp;matches&nbsp;the&nbsp;given<br>
+hash&nbsp;value,&nbsp;then&nbsp;updates&nbsp;the&nbsp;value&nbsp;associated&nbsp;with&nbsp;the&nbsp;key.<br>
+The&nbsp;size&nbsp;of&nbsp;the&nbsp;new&nbsp;value&nbsp;when&nbsp;serialized&nbsp;and&nbsp;encoded&nbsp;is<br>
+limited&nbsp;to&nbsp;20K.&nbsp;&nbsp;If&nbsp;the&nbsp;hash&nbsp;value&nbsp;you&nbsp;give&nbsp;does&nbsp;not&nbsp;match<br>
+the&nbsp;hash&nbsp;of&nbsp;the&nbsp;current&nbsp;value,&nbsp;this&nbsp;function&nbsp;will&nbsp;raise<br>
+<a href="#UpdateFailedError">UpdateFailedError</a>.<br>
+&nbsp;<br>
+To&nbsp;calculate&nbsp;the&nbsp;hash&nbsp;of&nbsp;a&nbsp;value&nbsp;v,&nbsp;use:&nbsp;<a href="#-hash_value">hash_value</a>(v)</tt></dd></dl>
+
+<dl><dt><a name="DistributedState-version"><strong>version</strong></a>(self)</dt><dd><tt>Get&nbsp;version&nbsp;string&nbsp;returned&nbsp;by&nbsp;server</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DuplicateError">class <strong>DuplicateError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#DuplicateError">DuplicateError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="DuplicateError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#DuplicateError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="DuplicateError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DuplicateError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DuplicateError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DuplicateError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="DuplicateError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DuplicateError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DuplicateError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="DuplicateError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DuplicateError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#DuplicateError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="InvalidAddressError">class <strong>InvalidAddressError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#InvalidAddressError">InvalidAddressError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="InvalidAddressError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#InvalidAddressError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="InvalidAddressError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidAddressError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidAddressError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="InvalidAddressError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="InvalidAddressError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidAddressError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="InvalidAddressError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="InvalidAddressError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidAddressError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidAddressError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="LoginError">class <strong>LoginError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#LoginError">LoginError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="LoginError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#LoginError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="LoginError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="LoginError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="LoginError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="LoginError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="LoginError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="LoginError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="LoginError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="LoginError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="LoginError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#LoginError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PermissionError">class <strong>PermissionError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#PermissionError">PermissionError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="PermissionError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#PermissionError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="PermissionError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PermissionError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PermissionError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="PermissionError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="PermissionError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="PermissionError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="PermissionError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="PermissionError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="PermissionError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#PermissionError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SizeError">class <strong>SizeError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#SizeError">SizeError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="SizeError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#SizeError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="SizeError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="SizeError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="SizeError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="SizeError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="SizeError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="SizeError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="SizeError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="SizeError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="SizeError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#SizeError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UnexpectedError">class <strong>UnexpectedError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#UnexpectedError">UnexpectedError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="UnexpectedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#UnexpectedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="UnexpectedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="UnexpectedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="UnexpectedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="UnexpectedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="UnexpectedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="UnexpectedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="UnexpectedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="UnexpectedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="UnexpectedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#UnexpectedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UnjoinedError">class <strong>UnjoinedError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#UnjoinedError">UnjoinedError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="UnjoinedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#UnjoinedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="UnjoinedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="UnjoinedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="UnjoinedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="UnjoinedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="UnjoinedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="UnjoinedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="UnjoinedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="UnjoinedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="UnjoinedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#UnjoinedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UpdateFailedError">class <strong>UpdateFailedError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="appstate.html#UpdateFailedError">UpdateFailedError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="UpdateFailedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object at 0x81419c0&gt;<dd><tt>T.<a href="#UpdateFailedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="UpdateFailedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="UpdateFailedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="UpdateFailedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="UpdateFailedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="UpdateFailedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="UpdateFailedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="UpdateFailedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="UpdateFailedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="UpdateFailedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#UpdateFailedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+<dd><tt>exception&nbsp;message</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-hash"><strong>hash</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-hash_value"><strong>hash_value</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-length_data"><strong>length_data</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-serialize"><strong>serialize</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-unserialize"><strong>unserialize</strong></a>(s)</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ADMIN_ONLY</strong> = 1<br>
+<strong>ANY</strong> = 0<br>
+<strong>AUTHORIZED_ONLY</strong> = 2<br>
+<strong>SERVER</strong> = 'pygameserver.appspot.com'<br>
+<strong>UNBANNED_ONLY</strong> = 3<br>
+<strong>__author__</strong> = 'Nathan Whitehead'<br>
+<strong>__version__</strong> = '0.1'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Nathan&nbsp;Whitehead</td></tr></table>
+</body></html>
