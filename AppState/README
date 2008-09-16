@@ -1,0 +1,606 @@
+=AppState=
+
+==Distributed Application Shared State==
+
+Copyright 2008, Nathan Whitehead
+Released under Apache-2.0 and MIT licenses (see LICENSE section)
+
+This module allows your Python programs to easily have a persistent
+global distributed shared state.  This state can be used to store
+things like number of users, game high scores, message of the day from
+the author, etc.  The state has an interface like a dictionary with
+some additional synchronization functionality and some restrictions.
+This module connects to a server on the Google App Engine to store and
+manage data.  It uses a simple security model based on Google
+accounts.
+
+
+==DOWNLOAD==
+
+A source distribution is available at PyPI:
+http://pypi.python.org/pypi/AppState
+
+
+==INSTALLATION==
+
+AppState is packaged as Python source using distutils. To install, run
+the following command as root:
+
+python setup.py install
+
+For more information and options about using distutils, read:
+http://docs.python.org/inst/inst.html
+
+
+==DOCUMENTATION==
+
+The documentation consists of this README and the
+[http://www.paranoidbrain.com/appstate.html pydoc function
+documentation].
+
+
+==OVERVIEW==
+
+The basic idea is that you have an application that runs on many
+different computers, maybe simultaneously.  You would like to share
+data between instances of your application that are being run by
+different users.  This module implements a shared state space
+that all the instances of your application can use to communicate
+data safely.
+
+Before the shared space can be used, the creator of the application
+must register the application with the server.  Once the application
+is registered, users that are running an instance of your application
+will connect to the server and join the shared application space.
+They may also login using their Google account information.  Once they
+have joined, they may start reading and modifying the state.  Changes
+to the state are visible to all users.
+
+The state itself is similar to a dictionary in python.  Keys are
+strings and values can be any python value that can be encoded by
+rencode.  These values are things like bools, ints, strings, floats,
+lists, dictionaries with simple keys.  It does NOT include
+objects from user-defined classes.
+
+Every call to query or update the distributed state requires a HTTP
+connection to the Google App Engine server.  For me this means that
+every operation takes between 0.1 seconds and 3 seconds.  Other people
+may have a different experience with performance.  In any case, the
+shared state is not fast enough for real-time games.  It MAY be fast
+enough for turn-based games.  It is more suitable for setting up a
+message board to match players and exchange IP addresses for a
+real-time online game, or for sharing game objects (e.g. custom
+levels, achievements) between players.
+
+The distributed state also does not currently have a push capability,
+that is, there is no way for the server to send a message to an 
+application instance telling it that something has happened.  The
+server just waits for application instances to connect and query
+the state.  
+
+
+==HOW TO USE==
+
+===Creating a new app===
+
+You need a Google account to register an application and be an admin.
+If you do not have a Google account, sign up at:
+https://www.google.com/accounts/Login
+
+Every application has a unique application id.  Every instance of your
+application will use the same application id.  Recommended naming
+scheme for appid:
+
+(your name OR your domain name) PLUS application name
+
+So one of my hypothetical application ids is:
+'NathanWhitehead+AstroMaxBlaster'
+
+The basic steps are to connect to the server by creating a DistributedState
+object, login, then call new_app().
+
+{{{
+state = DistributedState()
+state.login('your@email', 'password')
+state.new_app(appid, ANY, ANY)
+}}}
+
+The arguments to new_app() are your unique appid, read permissions,
+and write permissions.  Choices for permissions are:
+
+  * ANY - means anyone can do the operation, even if not logged in
+
+  * ADMIN_ONLY - only the admin can do the operation
+
+  * AUTHORIZED_ONLY - only users that have been explicitly authorized
+        can do the operation
+
+  * UNBANNED_ONLY - any logged in user that has not been banned can do
+        the operation
+
+For example, setting readmode=ANY and writemode=ADMIN_ONLY means that
+anyone can read the application state, but only the admin can make any
+changes.  You cannot change readmode or writemode once the application
+has been registered.  Only the admin can authorize users or ban them.
+The only mode that allows users who are not logged in is ANY.  The
+other modes require the person to be logged in.
+
+You only need to create the application object one time, it will
+persist in the Google App Engine datastore until you delete it.
+
+
+===Joining a state===
+
+Once the application id has been registered, people can start joining
+the shared application state.  To join, they do:
+{{{
+    state = DistributedState()
+    state.join(appid)
+}}}
+
+If the read and write modes require it, users might also need to
+login after joining.
+
+
+===Using the state===
+
+The simplest way to use the distributed state object is to treat it
+like a dictionary.  You can store values into the state using:
+
+{{{
+state['key'] = value
+}}}
+
+The key must be a string of reasonable size without linebreaks.  The
+values you can store in the state are any python data value that can
+be encoded by rencode.  These values include bools, ints, strings,
+floats, lists, dictionaries with simple keys.  It does NOT include
+objects from user-defined classes.  The values must be 20K or less in
+size after being serialized and encoded into a string.  To check the
+size of a value, use:
+
+{{{
+length_data(value)
+}}}
+
+To retrieve stored values, use:
+
+{{{
+state['key']
+}}}
+
+If no value has been stored under that key, this will raise a KeyError
+exception.
+
+You can delete keys using del:
+
+{{{
+del state['key']
+}}}
+
+
+===EXAMPLE: Message of the Day===
+
+A very simple example is a 'message of the day' feature.  The
+application retrieves the state and displays it.  Only the admin who
+created the application can change the state, but anyone can read it.
+
+The application is registered by the creator and the initial message
+is set with:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('your@email', 'password')
+state.new_app('YourName+MessageOfTheDayForMyGreatApp', 
+              readmode=appstate.ANY,
+              writemode=appstate.ADMIN_ONLY)
+state['message'] = 'New version of MyGreatApp available today!'
+}}}
+
+The beginning of MyGreatApp will do the following:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.join('YourName+MessageOfTheDayForMyGreatApp')
+print state['message']
+# Do the rest of MyGreatApp
+}}}
+
+When people run MyGreatApp they will see the latest message that you
+have set.  To change the message, you do:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('your@email', 'password')
+state.join('YourName+MessageOfTheDayForMyGreatApp')
+state['message'] = 'If you liked MyGreatApp, you will love MyGreatestApp' 
+}}}
+
+
+===Updating state===
+
+Just using direct dictionary operations is not a good idea for
+applications that will have more than one person updating values.
+For example, suppose the state keeps track of a number representing
+how many times the application has been run anywhere.  When the
+application starts up it might run something like
+state['count'] = state['count'] + 1.
+
+But what if two different people run the application at the same
+time?  Both of them evaluate state['count'] and get 102.  They both
+increment to get 103, then they both set the count to 103.  But
+that's wrong, the count should go to 104 since two copies of the
+application started.
+
+First register the counter testing application.
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('your@email', 'password')
+state.new_app('YourName+CounterTest', appstate.ANY, appstate.ANY)
+}}}
+
+Now here's the BAD counting application:
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.join('YourName+CounterTest')
+
+def incr_count():
+    try:
+        old = state['count']
+        new = old + 1
+        state['count'] = new
+    except KeyError:
+        state['count'] = 1
+
+incr_count()
+print state['count']
+}}}
+
+In Linux you can see the bad behavior by running two copies simultaneously:
+{{{
+python test/counter_bad.py & python test/counter_bad.py &
+}}}
+
+The solution is to use update().  When you call update() you give a
+hash of the previous version of the value you are updating along with
+your new value.  If everything goes well the value will update.  If
+someone else has beaten you to changing the value, the hash value you
+passed will not match and the function will raise an exception
+UpdateFailedError.  You can get the new value and try again.
+
+For the example, both applications try to update from 102->103.  One
+of them will succeed but the other one has to fail.  The one that
+fails rereads the updated count (103), increments it to 104, and then
+tries to update 103->104.  If no one else has beaten the application
+again then the update will succeed.
+
+Here's the GOOD counting application:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.join('YourName+CounterTest')
+
+def incr_count():
+    try:
+        old = state['count']
+        new = old + 1
+        oldhash = appstate.hash_value(old)
+        state.update('count', oldhash, new)
+    except appstate.UpdateFailedError:
+        incr_count() # try again
+    except KeyError:
+        state['count'] = 1
+
+incr_count()
+print state['count']
+}}}
+
+
+===State operations===
+
+To help automate the process of using update() you can use apply_op().
+This way you don't have to worry about catching exceptions and
+retrying operations on the state. To use apply_op(), you must define a
+function on python values that will be applied.  The function you
+write must take exactly one argument, the input value, and return one
+value, the output value.
+
+Some optional keyword arguments control how apply_op() deals with
+missing keys: 'create' is a boolean that indicates to create
+new values for the key, and 'defaultvalue' indicates what value
+to use.
+
+Here is the good counting example rewritten to use apply_op().
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.join('YourName+CounterTest')
+
+def inc(x):
+    return x + 1
+
+state.apply_op('count', inc, create=True, defaultvalue=1)
+print state['count']
+}}}
+
+
+===Optimized gets===
+
+To save time and network traffic, you can request values from the
+shared store and only get updated values when there is something new
+to report.  Use the get_if_changed() function to do this.  To use it,
+pass it the key and a hash of the value you already know about.  The
+function will either return the new current value that you don't know,
+or it will raise a DataUnchangedError exception if there have not been
+any changes.
+
+Here's a code snippet that gets a list from the shared state:
+{{{
+lst = [1,2,3,4,5]
+try:
+    lst = state.get_if_changed('somenums', appstate.hash_value(lst))
+except appstate.DataUnchangedError:
+    pass
+print lst
+}}}
+
+
+===Authorizing and banning users===
+
+For many applications it is useful to be able to ban troublesome users
+or limit changes to a small set of authorized users.  Only the admin
+can ban or authorize users.
+
+In the mode AUTHORIZED_ONLY, every user that is allowed to read/write
+must be explicitly authorized by the admin.  Here's how the admin
+authorizes a user:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('admin@email', 'password')
+state.join('appid')
+state.authorize('otheruser@email')
+}}}
+
+Banning works similarly.
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('admin@email', 'password')
+state.join('appid')
+state.ban('malicious@email')
+}}}
+
+Note that in the mode AUTHORIZED_ONLY it doesn't matter if a user is
+banned or not.  It only matters whether they have been authorized.  In
+the mode UNBANNED_ONLY it does not matter whether a user has been
+authorized, it only matters whether they have been banned.
+
+To reverse an authorization or a ban, use unauthorize() or unban().
+Only the admin can reverse an authorization or a ban.
+
+
+===Sending email===
+
+Not all players will be online at the same time.  To let players that
+are involved with the game but not currently playing know that something
+has happened, this module can send emails.
+
+To prevent abuse, any application instance that wishes to send an
+email must be logged in to Google accounts.  The email sent will
+always include a correct sender with the logged in users email.
+
+To send an email message:
+
+{{{
+import appstate
+
+state = appstate.DistributedState()
+state.login('your@email', 'password')
+state.join('YourName+GrueAttack')
+msg = '''
+I attacked you with a grue!
+Continue playing GrueAttacker to counterattack.'''
+state.email('buddys@email', 'Grue attack!', msg)
+}}}
+
+
+==COMMAND LINE==
+
+As a convenience, admin operations are available through the command
+line.  This can be useful for scripting and testing.
+
+{{{
+Usage: python appstate.py command [args]
+
+Commands:
+    version
+    new_app   email password appid readmode writemode
+    delete_app   email password appid
+    authorize   youremail yourpassword appid subjemail
+    ban   youremail yourpassword appid subjemail
+    unauthorize   youremail yourpassword appid subjemail
+    unban   youremail yourpassword appid subjemail
+}}}
+
+==SECURITY==
+
+This module provides some rudimentary security features but you should
+not use this module to create applications that require security
+guarantees.
+
+===Plaintext===
+
+All messages except login information are transmitted in plain text.
+This means that an adversary snooping network traffic can see the
+information your application sends back and forth to the server and
+potentially modify it.  For example, this means that if you set your
+security model to ADMIN_ONLY for writing, a malicious attacker may be
+able to corrupt changes that are sent by the legitimate admin.  The
+attacker should not be able to steal the login credentials and then be
+able to masquerade later as the admin by sniffing network traffic.
+
+Since python source can easily be modified, you cannot rely on every
+instance of your application to behave nicely.  For example, if your
+application is a game and the shared state is a high score board, a
+malicious user could alter the gameplay to automatically give himself
+a high score.  There is no good way to defend against this attack
+short of securing the hardware used to run the application (this is
+the model used by the XBox 360).
+
+===Encoding values===
+
+Encoding and decoding of python values in the shared state is done by
+rencode.  This means that if an attacker corrupts the data in the
+shared state, you may get a ValueError exception when retrieving
+information from the state.  It should not be possible for corrupted
+data to make your application segfault or execute arbitrary python
+code.
+
+Be careful how you interpret data in the shared state.  Remember that
+an attacker can change the data there.  For example, it is a very
+bad idea to store filenames in the shared state and then use those
+filenames to read and write to the local filesystem.  Instead, your
+application should construct its own filenames and store data from
+the shared state using those filenames.  
+
+Never construct shell commands from data in the state.  There are too
+many ways that corrupted data can alter the effects of the shell
+command.
+
+Never use pickle to store and retrieve python values in the shared
+state.  Unpickling objects allows arbitrary python code to execute (by
+design).  If you absolutely need to store a user object in the shared
+state, extend rencode to handle your object safely.
+
+===User emails===
+
+Google App Engine does not currently (as of 9/14/2008) have the ability
+to uniquely identify users other than by email address.  This means
+that when you ban an email address, the same user can change their
+email address to unban themselves.  There is also no way to ban users
+by IP address.
+
+===Abuse===
+
+Please do not use too much space for no good reason, there is a 500MB
+limit for all users of the server.  There is no hard-code size limit
+per application, just don't be wasteful or I will delete your
+application.  Please do not try to crash the server and make Google
+ban me from the App Engine.  That said, I have secret tools that are
+not being released that monitor access to the server and attempt to
+mitigate abuse.
+
+If you discover a security problem with this package or encounter
+problem behavior from attackers, please email me.
+
+==PERFORMANCE==
+
+Each access to the shared state requires communication with the Google
+App Engine server.  To minimize slowdowns, try to cache data values
+locally whenever possible.  Use get_if_changed() when possible.  When
+writing values to the shared state, batch together as many changes as
+possible.  Instead of looping and calling apply_op() once per loop,
+make the operation you are applying loop over the data and make the
+changes.  This way there will only be one call to apply_op().
+
+When deciding how to structure you shared data space, try to make a
+good tradeoff between the number of keys to use and the size of the
+values in each key.  You want to use as few keys as possible to
+minimize the number of round-trip calls between the application
+instances and the server.  On the other hand, you want the data stored
+under each key to be as short as possible so that the messages that
+are exchanged are as small as possible.
+
+Another consideration is that atomic updates using update() or
+apply_op() can only happen on one key at a time.  If you split up data
+into different keys, you can no longer guarantee the consistency of
+the data when there are multiple concurrent writers.  That is not
+necessarily a bad thing, just something to be aware of.
+
+On the flip side, if only one key is used then all accesses to the
+central server will be serialized.  If there are many simultaneous
+users attempting to modify the state, each user will experience many
+update() failures and each modification will take longer.
+
+My advice is to start with all the state stored in one key and only
+use update() or apply_op() to change the state.  This makes reasoning
+about what is happening simpler.  Once the state starts including
+auxiliary information that takes up too much space, start separating
+out the bulky data into separate keys, with references in the main
+state key.  Auxiliary features that are independent of the main state
+should also go into new keys (e.g. like adding a message board).
+
+
+==LICENSE==
+
+===AppState excluding rencode.py===
+
+Copyright 2008 Nathan Whitehead
+Copyright 2007 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you
+may not use this file except in compliance with the License.  You may
+obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied.  See the License for the specific language governing
+permissions and limitations under the License.
+
+===rencode.py===
+
+Modifications by Nathan Whitehead 2008 released to public domain.
+Modifications by Connelly Barnes 2006-2007 released to public domain.
+
+Licensed under the "MIT license":
+
+Copyright (C) 2001-2002 Bram Cohen
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+The Software is provided "AS IS", without warranty of any kind,
+express or implied, including but not limited to the warranties of
+merchantability, fitness for a particular purpose and
+noninfringement. In no event shall the authors or copyright holders be
+liable for any claim, damages or other liability, whether in an action
+of contract, tort or otherwise, arising from, out of or in connection
+with the Software or the use or other dealings in the Software."
+
+(The rencode module is licensed under the above license as well).
+
+
+==KNOWN BUGS==
+
+None so far.
