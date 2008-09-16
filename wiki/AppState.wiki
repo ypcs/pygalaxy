@@ -562,6 +562,11 @@ should also go into new keys (e.g. like adding a message board).
 
 ==LICENSE==
 
+This module is released under the Apache-2.0 license, the same license
+that Google uses for their Google App Engine SDK.  One file,
+rencode.py, is distributed under the MIT license.  Both licenses are
+compatible with the LGPL used by Pygame.
+
 ===AppState excluding rencode.py===
 
 Copyright 2008 Nathan Whitehead
