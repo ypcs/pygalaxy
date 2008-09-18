@@ -394,9 +394,26 @@ class Version(webapp.RequestHandler):
     def post(self):
         self.response.out.write(VERSION + '<br>\n')
 
+
+class Owner(db.Model):
+    name = db.TextProperty()
+
+class Pet(db.Model):
+    name = db.TextProperty()
+    appl = db.ReferenceProperty(Owner)
+
+class AppBug(webapp.RequestHandler):
+    def get(self):
+        pete = Owner(name='Pete')
+        pete.put()
+        dog = Pet(name='fido', appl = pete)
+        dog.put()
+        self.response.out.write('Hello')
+
 application = webapp.WSGIApplication([
         ('/prpc', Prpc),
         ('/version', Version),
+        ('/appbug', AppBug),
         ], debug=True)
 
 def main():

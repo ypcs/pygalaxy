@@ -394,9 +394,15 @@ class Version(webapp.RequestHandler):
     def post(self):
         self.response.out.write(VERSION + '<br>\n')
 
+class IpTest(webapp.RequestHandler):
+    def get(self):
+        self.response.out.write('Headers:' + str(self.request.headers))
+        self.response.out.write('Hello ip:' + self.request.remote_addr)
+
 application = webapp.WSGIApplication([
         ('/prpc', Prpc),
         ('/version', Version),
+        ('/ip', IpTest),
         ], debug=True)
 
 def main():
