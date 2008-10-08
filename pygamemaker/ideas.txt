@@ -1,0 +1,127 @@
+PyGameMaker
+
+All classes that you create with PyGameMaker that will be graphically
+represented should inherit from Base. This lets them have an id, defines
+serialization and deserialization commands, and sets up default object
+editors. It also defines the prototype-based programming commands to
+allow easy object duplication and specialization.
+
+
+Type system
+
+Objects have an attribute called 'type' that is a string with the
+intended type of the object. Why do this? This allows a simple form of
+type checking. When outlets in objects need a Sprite, the user will only
+be shown Sprite objects as choices for example.
+
+Why not use the 'type' operator built into python? Always get <type
+'instance'>, doesn't work for type checking.
+
+What about __class__? This allows type checking. Want more flexibility .
+In addition, type as an attribute works better with serialization. No  .
+need to mess around with subclassing or dealing with python's class    .
+mechanisms if you don't want to                                        .
+
+Why not just use hasattribute? 'Duck typing'. This is the recommended
+default type system; check what you need and raise a type error if it's
+not there. This is flexible, no need for subclassing, reliable. But, it
+doesn't allow datatypes to declare what types they need explicitly. For
+a game design tool, we might have functions that connect to sprites that
+are actually very general and don't need the sprite behavior. But it
+is confusing to the user if sprite functions start showing up in other
+places.
+
+Interface Builder idea
+
+Declare a type of some data, then it will automatically construct a gui
+for editing that data. Types are always tuples, with first position a
+descriptor.  Might only be first position.
+(BOOL,default)
+(INT1, default) type in number
+(INT,low,high)
+
+
+
+
+
+Implement game engine
+For your game, just define data that represents your game
+Maybe define a few functions
+Slowly write gui tools to create data structure
+Game engine uses pyglet or pygame
+Output is python source that is your game
+Compile with py2exe (or not)
+
+No global variables!
+
+Class organization:
+
+Game - toplevel object that represents entire game
+    title
+    author
+    creationdate
+    license
+    resolution (default 1024x768)
+    fps (default 60)
+    splash screen info
+    list of Rooms
+    score
+    health
+    lives
+    global Scripts
+
+Room - a room or level in a game
+    bgcolor (behind any backgrounds)
+    list of Backgrounds
+    list of TileLayers
+    list of Objects
+    gravity vector
+    room specific scripts
+
+Background - a graphical image without game logic
+    image (transparent allowed)
+    offset
+    z position
+
+TileLayer - one layer of tiles
+    TileSet
+    list of Tiles
+    offset
+    zpos - depth
+    
+TileSet - a sheet of tiles for creating levels
+    image
+    xoff yoff - offset to tile images
+    xsize ysize - size of each tile (must be uniform for each set)
+    xsep yset - separating distance
+
+Tile
+    num - which tile in set
+    pos - where to draw, not necessarily snapped to grid
+
+Object - a single instance of a game object
+    list of Sprites
+    pos - position
+    dir - direction of travel
+    speed
+    gravity - is it affected by gravity?
+    wall - is it a wall?
+    checkcollisions - check for any collisions?
+    (for collisions to occur both objects must be checked)
+    pixelperfect - collision accuracy
+    object specific scripts
+
+Sprite - a single animation
+    image
+    xoff yoff
+    xsize ysize
+    xsep ysep
+    xcenter ycenter - which point to put at object position
+    (necessary for multiple sprite animations lining up)
+    fps_mode (either absolute or relative)
+    fps (if relative, is relative to speed)
+    bbox - bounding box, constant for entire strip
+    
+Sounds
+    snddata
+    3d positioning info ?
