@@ -10,8 +10,8 @@ label = pyglet.text.Label('Hello, world',
                           font_size=36,
                           x=window.width//2, y=window.height//2,
                           anchor_x='center', anchor_y='center')
-image = pyglet.resource.image('kitten.jpg')
-tiles = pyglet.resource.image('tile_set_ground.png')
+image = pyglet.resource.image('kitten.png')
+tiles = pyglet.resource.image('tile_set_ground2.png')
 
 class Transform:
     '''A 2D affine transformation plus alpha
@@ -266,7 +266,7 @@ class Room:
             l.generate(batch=batch)
     
 bg = Background()
-bg.image = pyglet.resource.image('kitten.jpg')
+bg.image = pyglet.resource.image('kitten.png')
 bg.transform.scale(10.0)
 
 ts = TileSet()
