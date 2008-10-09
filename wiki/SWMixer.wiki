@@ -53,7 +53,8 @@ http://docs.python.org/inst/inst.html
 
 ==DOCUMENTATION==
 
-This README file along with the [http://paranoidbrain.com/swmixer.html pydoc documentation] are the documentation for SWMixer.
+This README file along with the pydoc documentation in the doc/
+directory are the documentation for SWMixer.
 
 
 ==HOW CAN IT POSSIBLY WORK IN PYTHON?==
@@ -290,3 +291,5 @@ No way to pan mono sounds to different positions in stereo output.
 
 StreamingSounds may not be sample accurate for looping and setting
 position.
+
+Threading behavior may not be optimal on some platforms.
