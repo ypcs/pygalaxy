@@ -3,7 +3,7 @@ from distutils.core import setup, Extension
 setup(name = "SWMixer",
       author = "Nathan Whitehead",
       author_email = "nwhitehe@gmail.com",
-      version = "0.1.3",
+      version = "0.1.4",
       url = "http://code.google.com/p/pygalaxy/",
       py_modules = ['swmixer'],
       description = "An advanced software mixer for sound playback and recording",
