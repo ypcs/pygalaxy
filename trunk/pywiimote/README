@@ -1,0 +1,63 @@
+PyWiimote
+
+Use the Wii Remote in python on all major platforms.
+
+Basic architecture:
+  Two pieces, a pure python interface module pywiimote
+  Architecture-dependent driver
+
+The two pieces communicate using sockets bound locally.
+Usually the python interface can start the driver if it is not
+already running (if it can find it).
+
+This architecture was chosen because there are many platform
+dependent issues with the Wiimote drivers.  By separating
+out the driver from the interface, it makes changing each one
+separately more reliable.  User applications can also, if they
+prefer, listen to the socket connection themselves instead
+of using the python interface module.
+
+The initial drivers are pure python for ease of installing.
+But, doing low-level bluetooth in python is not 100% reliable
+on all platforms.
+
+The driver: 
+  accepts connections on localhost port 31307 (l33t for wimot)
+  waits for (command, data), command is a string
+  sends response and then waits for next command
+  commands are:
+    discover (get list of available mac ids for wiimotes)
+    connect MA (try to connect to wiimote at mac address MA)
+    poll N (returns latest state of wiimote N)
+    get N (returns list of events with timestamps for wiimote N)
+    ir-enable N (turn on IR)
+    ir-disable N (turn off IR)
+    rumble-enable N (turn on rumble)
+    rumble-disable N
+    led (bool*4) N (turn on/off leds according to bit pattern)
+
+Examples includes glue code demonstrating how to integrate with
+pyglet and pygame event loops.
+
+Protocol
+
+Driver part is server, interface part is client
+
+Client initiates all communication, sends command and gets response
+Command is a pair of a text string command and data
+format of data (2nd part of pair) depends on command (may be None)
+Server response depends on command, may be None
+
+Command Data Response
+"INFO" None list, gets info for devices connected
+"GET" int list, gets state of one device
+"RUMBLE" int*bool None, set rumble on/off for particular device
+
+GET status format:
+  tuple of
+    button state (list of bool, includes nunchuk buttons)
+    accelerometer values (list of float) (normalized with 1 = 1G, xyz)
+    nunchuk acc values (list of float) (normalized, xyz)
+    joystick values (list of float) (normalized to -1..1, xy)
+
+If no nunchuk, will always have 0.0 for acc and unpressed for buttons.
