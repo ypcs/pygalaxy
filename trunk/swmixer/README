@@ -291,3 +291,5 @@ No way to pan mono sounds to different positions in stereo output.
 
 StreamingSounds may not be sample accurate for looping and setting
 position.
+
+Threading behavior may not be optimal on some platforms.

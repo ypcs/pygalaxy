@@ -14,6 +14,7 @@ Released under the LGPL
 
 """
 
+
 import time
 import wave
 import thread
@@ -600,6 +601,8 @@ def tick(extra=None):
         gmicdata = gmicstream.read(sz)
     glock.release()
     odata = (b.astype(numpy.int16)).tostring()
+    # yield rather than block, pyaudio doesn't release GIL
+    while gstream.get_write_available() < gchunksize: time.sleep(0.001)
     gstream.write(odata, gchunksize)
 
 def init(samplerate=44100, chunksize=1024, stereo=True, microphone=False, input_device_index=None, output_device_index=None):

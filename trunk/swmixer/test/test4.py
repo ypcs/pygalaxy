@@ -2,7 +2,7 @@ import sys
 import swmixer
 import numpy
 
-swmixer.init(samplerate=44100, chunksize=1024, stereo=False, microphone=True)
+swmixer.init(samplerate=44100, chunksize=1024, stereo=False, microphone=True, input_device_index=1)
 snd = swmixer.Sound("test1.wav")
 snd.play(loops=-1)
 
